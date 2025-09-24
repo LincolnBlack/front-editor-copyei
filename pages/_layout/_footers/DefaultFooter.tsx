@@ -1,0 +1,35 @@
+import React from 'react';
+import classNames from 'classnames';
+import Footer from '../../../layout/Footer/Footer';
+import useDarkMode from '../../../hooks/useDarkMode';
+
+const DefaultFooter = () => {
+	const { darkModeStatus } = useDarkMode();
+
+	return (
+		<Footer>
+			<div className='container-fluid'>
+				<div className='row'>
+					<div className='col'>
+						<span className='fw-light'>
+							Copyright © {new Date().getFullYear()} - Version{' '}
+							{process.env.NEXT_PUBLIC_VERSION}
+						</span>
+					</div>
+					<div className='col-auto'>
+						<a
+							href='/'
+							className={classNames('text-decoration-none', {
+								'link-dark': !darkModeStatus,
+								'link-light': darkModeStatus,
+							})}>
+							<small className='fw-bold'>Copyei</small>
+						</a>
+					</div>
+				</div>
+			</div>
+		</Footer>
+	);
+};
+
+export default DefaultFooter;

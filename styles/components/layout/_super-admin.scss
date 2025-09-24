@@ -1,0 +1,52 @@
+//
+//  Super Admin
+//
+
+.super-admin {
+	@include padding(map-deep-get($avatar, padding-y) map-deep-get($avatar, padding-x));
+
+	display: flex;
+	align-items: center;
+	background-color: auto-shade-tint(map-deep-get($aside, background-color), 18%);
+	color: color-contrast(
+		auto-shade-tint(map-deep-get($aside, background-color), 18%),
+		map-deep-get($navigation, item, color-dark),
+		map-deep-get($navigation, item, color-light)
+	);
+	cursor: pointer;
+	transition: $transition-base;
+
+	&.open {
+		@include padding(
+			(map-deep-get($avatar, padding-y) * 0.5) (map-deep-get($avatar, padding-x) * 0.5)
+		);
+		@include margin(
+			(map-deep-get($avatar, padding-y) * 0.5) (map-deep-get($avatar, padding-x) * 0.5)
+		);
+
+		border-radius: $border-radius * 0.5;
+	}
+}
+
+.super-admin-info {
+	@include aside-close {
+		display: none;
+	}
+}
+
+.super-admin-name {
+	@include font-size(map-deep-get($avatar, name, font-size));
+
+	font-weight: 600;
+}
+
+.super-admin-sub-title {
+	@include font-size(map-deep-get($avatar, subt-title, font-size));
+
+	color: $gray-600;
+	font-weight: 400;
+}
+
+.super-admin-menu {
+	padding-bottom: 1rem - 0.375rem;
+}
