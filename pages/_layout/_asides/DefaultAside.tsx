@@ -3,16 +3,16 @@ import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Brand from '../../../layout/Brand/Brand';
 import Navigation, { NavigationLine } from '../../../layout/Navigation/Navigation';
-import User from '../../../layout/User/User';
 import ThemeContext from '../../../context/themeContext';
 import Aside, { AsideBody, AsideFoot, AsideHead } from '../../../layout/Aside/Aside';
-import SuperAdmin from '../../../layout/SuperAdmin/SuperAdmin';
 import { useUser } from '../../../hooks/useUser';
 import { dashboardPagesMenu } from '../../../menu';
+import { adminPagesMenu } from '../../../menu';
+import User from '../../../layout/User/User';
 
 const DefaultAside = () => {
 	const { asideStatus, setAsideStatus } = useContext(ThemeContext);
-	const { isSuperAdmin } = useUser();
+	const { isAdmin } = useUser();
 
 	return (
 		<Aside>
@@ -22,10 +22,15 @@ const DefaultAside = () => {
 			<AsideBody>
 				<NavigationLine />
 				<Navigation menu={dashboardPagesMenu} id='aside-dashboard' />
+				{isAdmin && 
+				(<>
+					<NavigationLine />
+					<h6 className='navigation-title'>ADMIN</h6>
+					<Navigation menu={adminPagesMenu} id='aside-admin' />
+				</>)}
 				<NavigationLine />
 			</AsideBody>
 			<AsideFoot>
-				{isSuperAdmin && <SuperAdmin />}
 				<User />
 			</AsideFoot>
 		</Aside>

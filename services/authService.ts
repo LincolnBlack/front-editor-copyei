@@ -131,13 +131,17 @@ export interface ChangePasswordCredentials {
 }
 
 export interface User {
-	id: string;
-	email: string;
-	name: string;
-	role: string;
-	active: boolean;
-	createdAt: string;
-	updatedAt: string;
+	data: {
+		user: {
+			id: string;
+			email: string;
+			name: string;
+			role: string;
+			active: boolean;
+			createdAt: string;
+			updatedAt: string;
+		}
+	}
 }
 
 class AuthService {
@@ -249,8 +253,8 @@ class AuthService {
 		}
 	}
 
-	isSuperAdmin(user?: User): boolean {
-		return user?.role === 'superadmin';
+	isAdmin(user?: User): boolean {
+		return user?.data.user.role === 'ADMIN';
 	}
 
 	async updateProfile(credentials: UpdateProfileCredentials): Promise<User> {

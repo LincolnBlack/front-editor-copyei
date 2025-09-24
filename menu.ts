@@ -140,7 +140,7 @@ export const pageLayoutTypesPagesMenu = {
 	},
 };
 
-export const superAdminPagesMenu = {
+export const adminPagesMenu = {
 	users: {
 		id: 'users',
 		text: 'Usuários',

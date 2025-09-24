@@ -37,15 +37,15 @@ export const useUser = () => {
 		fetchUser();
 	}, []);
 
-	const isSuperAdmin = () => {
-		return authService.isSuperAdmin(user || undefined);
+	const isAdmin = () => {
+		return authService.isAdmin(user || undefined);
 	};
 
 	return {
 		user,
 		loading: loading || !hasCheckedAuth,
 		error,
-		isSuperAdmin: isSuperAdmin(),
+		isAdmin: isAdmin(),
 		refetch: fetchUser,
 	};
 };
