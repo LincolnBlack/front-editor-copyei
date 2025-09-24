@@ -3,7 +3,6 @@ import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useFormik } from 'formik';
 import useDarkMode from '../../../hooks/useDarkMode';
 import PaginationButtons, {
 	dataPagination,
@@ -14,6 +13,8 @@ import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, { SubHeaderLeft, SubHeaderRight } from '../../../layout/SubHeader/SubHeader';
 import Icon from '../../../components/icon/Icon';
 import Input from '../../../components/bootstrap/forms/Input';
+import Select from '../../../components/bootstrap/forms/Select';
+import Option from '../../../components/bootstrap/Option';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
@@ -21,7 +22,7 @@ import Modal, { ModalHeader, ModalBody, ModalFooter } from '../../../components/
 import { getFirstLetter } from '../../../helpers/helpers';
 import UserFormModal from './UserFormModal';
 import Badge from '../../../components/bootstrap/Badge';
-import userService, { User } from '../../../services/userService';
+import userService, { User, PaginatedUsers } from '../../../services/userService';
 import { useAdminAuth } from '../../../hooks/useAdminAuth';
 
 const Index: NextPage = () => {
@@ -31,27 +32,43 @@ const Index: NextPage = () => {
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [perPage, setPerPage] = useState<number>(PER_COUNT['10']);
 	const [data, setData] = useState<User[]>([]);
+	const [paginationMeta, setPaginationMeta] = useState<PaginatedUsers['meta'] | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+	
+	// Estados para os filtros
+	const [nameFilter, setNameFilter] = useState<string>('');
+	const [emailFilter, setEmailFilter] = useState<string>('');
+	const [roleFilter, setRoleFilter] = useState<string>('');
+	const [statusFilter, setStatusFilter] = useState<string>('');
 	const [modalStatus, setModalStatus] = useState<boolean>(false);
 	const [selectedUserId, setSelectedUserId] = useState<string>('new');
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-	const formik = useFormik({
-		initialValues: {
-			searchInput: '',
-		},
-		onSubmit: () => {
-			// alert(JSON.stringify(values, null, 2));
-		},
-	});
 
-	const fetchUsers = async () => {
+	const fetchUsers = async (page: number = currentPage, perPageCount: number = perPage) => {
 		try {
 			setLoading(true);
-			const users = await userService.getUsers();
-			setData(users);
+			
+			// Converter o status para o formato esperado pelo backend
+			let backendStatus = '';
+			if (statusFilter === 'active') {
+				backendStatus = 'Ativo';
+			} else if (statusFilter === 'inactive') {
+				backendStatus = 'Inativo';
+			}
+			
+			const result = await userService.getUsers({
+				page,
+				per_page: perPageCount,
+				name: nameFilter,
+				email: emailFilter,
+				role: roleFilter,
+				status: backendStatus,
+			});
+			setData(result.data);
+			setPaginationMeta(result.meta);
 		} catch (error) {
 			console.error('Erro ao buscar usuários:', error);
 			// Se for erro de autenticação, o interceptor já redireciona
@@ -67,6 +84,19 @@ const Index: NextPage = () => {
 	useEffect(() => {
 		fetchUsers();
 	}, []);
+
+	useEffect(() => {
+		fetchUsers(currentPage, perPage);
+	}, [currentPage, perPage]);
+
+	// Adicionar um useEffect para buscar quando os filtros mudarem
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			fetchUsers(1, perPage); // Reset para página 1 quando filtrar
+		}, 500); // Debounce de 500ms
+
+		return () => clearTimeout(timeoutId);
+	}, [nameFilter, emailFilter, roleFilter, statusFilter]);
 
 	const handleOpenModal = (userId: string = 'new') => {
 		setSelectedUserId(userId);
@@ -109,14 +139,26 @@ const Index: NextPage = () => {
 		}
 	};
 
-	const filteredData = data.filter(
-		(f: { name: string; email: string }) =>
-			// Name
-			f.name.toLowerCase().includes(formik.values.searchInput.toLowerCase()) ||
-			f.email.toLowerCase().includes(formik.values.searchInput.toLowerCase()),
-	);
+	const handleClearFilters = () => {
+		setNameFilter('');
+		setEmailFilter('');
+		setRoleFilter('');
+		setStatusFilter('');
+	};
 
-	const { items, requestSort, getClassNamesFor } = useSortableData(filteredData);
+	// Verificar se há filtros ativos
+	const hasActiveFilters = nameFilter || emailFilter || roleFilter || statusFilter;
+
+	// Adicionar um useEffect para buscar quando os filtros mudarem
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			fetchUsers(1, perPage); // Reset para página 1 quando filtrar
+		}, 500); // Debounce de 500ms
+
+		return () => clearTimeout(timeoutId);
+	}, [nameFilter, emailFilter, roleFilter, statusFilter]);
+
+	const { items, requestSort, getClassNamesFor } = useSortableData(data);
 
 	// Se está carregando a autenticação, mostra loading
 	if (authLoading) {
@@ -143,21 +185,60 @@ const Index: NextPage = () => {
 			</Head>
 			<SubHeader>
 				<SubHeaderLeft>
-					<label
-						className='border-0 bg-transparent cursor-pointer me-0'
-						htmlFor='searchInput'>
-						<Icon icon='Search' size='2x' color='primary' />
-					</label>
-					<Input
-						id='searchInput'
-						type='search'
-						className='border-0 shadow-none bg-transparent'
-						placeholder='Pesquisar usuário...'
-						onChange={formik.handleChange}
-						value={formik.values.searchInput}
-					/>
+					<div className='row g-3'>
+						<div className='col-md-3'>
+							<Input
+								type='text'
+								placeholder='Filtrar por nome...'
+								value={nameFilter}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNameFilter(e.target.value)}
+							/>
+						</div>
+						<div className='col-md-3'>
+							<Input
+								type='email'
+								placeholder='Filtrar por email...'
+								value={emailFilter}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailFilter(e.target.value)}
+							/>
+						</div>
+						<div className='col-md-3'>
+							<Select
+								ariaLabel='Filtrar por função'
+								value={roleFilter}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRoleFilter(e.target.value)}>
+								<Option value=''>Todas as funções</Option>
+								<Option value='ADMIN'>Administrador</Option>
+								<Option value='USER'>Usuário</Option>
+							</Select>
+						</div>
+						<div className='col-md-3'>
+							<Select
+								ariaLabel='Filtrar por status'
+								value={statusFilter}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}>
+								<Option value=''>Todos os status</Option>
+								<Option value='active'>Ativo</Option>
+								<Option value='inactive'>Inativo</Option>
+							</Select>
+						</div>
+					</div>
 				</SubHeaderLeft>
 				<SubHeaderRight>
+					{hasActiveFilters && (
+						<Button
+							icon='Clear'
+							color='warning'
+							className='me-2'
+							style={{
+								backgroundColor: '#ffc107',
+								color: '#000000',
+								border: '1px solid #ffc107'
+							}}
+							onClick={handleClearFilters}>
+							Limpar filtros
+						</Button>
+					)}
 					<Button
 						icon='PersonAdd'
 						color='primary'
@@ -196,14 +277,13 @@ const Index: NextPage = () => {
 												<th
 													onClick={() => requestSort('role')}
 													className='cursor-pointer text-decoration-underline'>
-													Role{' '}
+													Tipo{' '}
 													<Icon
 														size='lg'
 														className={getClassNamesFor('role')}
 														icon='FilterList'
 													/>
 												</th>
-												<th>Último login</th>
 												<th
 													onClick={() => requestSort('active')}
 													className='cursor-pointer text-decoration-underline'>
@@ -262,37 +342,21 @@ const Index: NextPage = () => {
 														<td>
 															<Badge
 																color={
-																	i.role === 'superadmin'
+																	i.role === 'ADMIN'
 																		? 'danger'
 																		: 'primary'
 																}
 																className='text-uppercase'>
-																{i.role}
+																{i.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
 															</Badge>
 														</td>
 														<td>
-															{i.lastLogin ? (
-																<>
-																	<div>
-																		{i.lastLogin.format('ll')}
-																	</div>
-																	<div>
-																		<small className='text-muted'>
-																			{i.lastLogin.fromNow()}
-																		</small>
-																	</div>
-																</>
-															) : (
-																<div> - </div>
-															)}
-														</td>
-														<td>
-															{i.active ? (
-																<Badge color='success'>Ativo</Badge>
-															) : (
+															{i.paused_at ? (
 																<Badge color='danger'>
 																	Inativo
 																</Badge>
+															) : (
+																<Badge color='success'>Ativo</Badge>
 															)}
 														</td>
 														<td>
@@ -324,12 +388,14 @@ const Index: NextPage = () => {
 								)}
 							</CardBody>
 							<PaginationButtons
-								data={filteredData}
+								data={data}
 								label='usuários'
 								setCurrentPage={setCurrentPage}
 								currentPage={currentPage}
 								perPage={perPage}
 								setPerPage={setPerPage}
+								totalItems={paginationMeta?.total || 0}
+								totalPages={paginationMeta?.last_page || 1}
 							/>
 						</Card>
 					</div>

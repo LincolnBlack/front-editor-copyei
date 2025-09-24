@@ -1,8 +1,4 @@
 import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
-import 'dayjs/locale/pt-br';
-
-dayjs.locale('pt-br');
 
 // Configuração base do axios
 const api = axios.create({
@@ -51,10 +47,20 @@ export interface User {
 	name: string;
 	email: string;
 	role: string;
-	lastLogin: Dayjs | null;
+	paused_at: string | null;
 	active: boolean;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface PaginatedUsers {
+	data: User[];
+	meta: {
+		current_page: number;
+		per_page: number;
+		total: number;
+		last_page: number;
+	};
 }
 
 export interface CreateUserData {
@@ -70,8 +76,17 @@ export interface UpdateUserData {
 	active: boolean;
 }
 
+export interface UseUsersFilters {
+	page?: number;
+	per_page?: number;
+	name?: string;
+	email?: string;
+	role?: string;
+	status?: string;
+}
+
 class UserService {
-	async getUsers(): Promise<User[]> {
+	async getUsers(filters: UseUsersFilters = {}): Promise<PaginatedUsers> {
 		try {
 			// Verificar se o usuário está autenticado
 			const token = localStorage.getItem('jwt_token');
@@ -79,13 +94,20 @@ class UserService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const response = await api.get<User[]>('/users');
+			const { page = 1, per_page = 10, name = '', email = '', role = '', status = '' } = filters;
 
-			// Converter as datas de string para Dayjs
-			return response.data.map((user) => ({
-				...user,
-				lastLogin: user.lastLogin ? dayjs(user.lastLogin) : null,
-			}));
+			const searchParams = new URLSearchParams({
+				page: page.toString(),
+				per_page: per_page.toString(),
+				name,
+				email,
+				role,
+				status,
+			}).toString();
+
+			const response = await api.get<PaginatedUsers>(`/users/list?${searchParams}`);
+
+			return response.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
@@ -104,11 +126,8 @@ class UserService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const response = await api.post<User>('/users', userData);
-			return {
-				...response.data,
-				lastLogin: dayjs(response.data.lastLogin),
-			};
+			const response = await api.post<{ data: User }>('/users', userData);
+			return response.data.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
@@ -127,11 +146,8 @@ class UserService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const response = await api.patch<User>(`/users/${id}`, userData);
-			return {
-				...response.data,
-				lastLogin: dayjs(response.data.lastLogin),
-			};
+			const response = await api.patch<{ data: User }>(`/users/${id}`, userData);
+			return response.data.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
@@ -150,11 +166,8 @@ class UserService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const response = await api.get<User>(`/users/${id}`);
-			return {
-				...response.data,
-				lastLogin: dayjs(response.data.lastLogin),
-			};
+			const response = await api.get<{ data: User }>(`/users/${id}`);
+			return response.data.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
