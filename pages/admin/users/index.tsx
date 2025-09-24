@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useDarkMode from '../../../hooks/useDarkMode';
 import PaginationButtons, {
@@ -28,6 +29,7 @@ import { useAdminAuth } from '../../../hooks/useAdminAuth';
 const Index: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
 	const { loading: authLoading, isAuthorized } = useAdminAuth();
+	const router = useRouter();
 
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [perPage, setPerPage] = useState<number>(PER_COUNT['10']);
@@ -360,6 +362,14 @@ const Index: NextPage = () => {
 															)}
 														</td>
 														<td>
+															<Button
+																color='info'
+																isLight
+																size='sm'
+																className='me-2'
+																onClick={() => router.push(`/admin/users/${i.id}`)}>
+																<Icon icon='Visibility' size='lg' />
+															</Button>
 															<Button
 																color='primary'
 																isLight
