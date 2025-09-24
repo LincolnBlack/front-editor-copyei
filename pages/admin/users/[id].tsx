@@ -61,6 +61,7 @@ const UserDetails: NextPage = () => {
 		try {
 			setLoading(true);
 			const userData = await userService.getUserById(id);
+			console.log(userData);
 			setUser(userData);
 		} catch (error) {
 			console.error('Erro ao buscar usuário:', error);
@@ -195,13 +196,14 @@ const UserDetails: NextPage = () => {
 					<Button color='primary' isLink icon='ArrowBack' tag='a' to='/admin/users'>
 						Voltar para a lista de usuários
 					</Button>
+					{/* 
 					<SubheaderSeparator />
 					<span className='text-muted fst-italic me-2'>Última atualização:</span>
 					<span className='fw-bold'>
 						{user
-							? new Date(user.updatedAt).toLocaleString('pt-BR')
+							? new Date(user.updated_at).toLocaleString('pt-BR')
 							: 'Carregando...'}
-					</span>
+					</span> */}
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<Button
@@ -271,29 +273,17 @@ const UserDetails: NextPage = () => {
 											<div className='col-12'>
 												<div className='d-flex align-items-center'>
 													<div className='flex-grow-1 ms-3'>
-														<div className='d-flex align-items-center pb-3'>
-															<div className='flex-shrink-0'>
-																<Icon
-																	icon='Person'
-																	size='2x'
-																	color='primary'
-																/>
-															</div>
-															<div className='flex-grow-1 ms-3'>
-																<div className='fw-bold fs-6 mb-0'>
-																	{user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
-																</div>
-																<div className='text-muted'>
-																	Tipo de usuário
-																</div>
-															</div>
-															<div className='flex-shrink-0 ms-2'>
-																<Badge
-																	color={user?.role === 'ADMIN' ? 'danger' : 'primary'}
-																	className='text-uppercase'>
-																	{user?.role === 'ADMIN' ? 'Admin' : 'User'}
-																</Badge>
-															</div>
+														<div className='fs-5 mb-0 d-flex gap-2'>
+															{user?.paused_at ? (
+																<Badge color='danger'>Inativo</Badge>
+															) : (
+																<Badge color='success'>Ativo</Badge>
+															)}
+															{user?.role === 'ADMIN' ? (
+																<Badge color='danger'>Administrador</Badge>
+															) : (
+																<Badge color='primary'>Usuário</Badge>
+															)}
 														</div>
 													</div>
 												</div>
@@ -301,16 +291,25 @@ const UserDetails: NextPage = () => {
 											<div className='col-12'>
 												<div className='d-flex align-items-center'>
 													<div className='flex-grow-1 ms-3'>
-														<div className='fs-5 mb-0'>
-															{user?.paused_at ? (
-																<Badge color='danger'>Inativo</Badge>
-															) : (
-																<Badge color='success'>Ativo</Badge>
-															)}
-														</div>
+														{user.description_plan && (
+															<div className='text-muted small mb-1'>
+																Descrição do plano: {user.description_plan}
+															</div>
+														)}
+														{user.due_date && (
+															<div className='text-muted small mb-1'>
+																Data de vencimento: {user.due_date}
+															</div>
+														)}
+														{user.usageDuration && (
+															<div className='text-muted small mb-1'>
+																Dias ativos: {user.usageDuration.days} dias
+															</div>
+														)}
 													</div>
 												</div>
 											</div>
+											<hr className='mt-3' />
 											{user && (
 												<div className='col-12'>
 													<div className='d-flex align-items-center'>
@@ -319,7 +318,7 @@ const UserDetails: NextPage = () => {
 																ID: {user.id}
 															</div>
 															<div className='text-muted small'>
-																Criado em: {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+																Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}
 															</div>
 															{user.paused_at && (
 																<div className='text-muted small'>
@@ -421,7 +420,7 @@ const UserDetails: NextPage = () => {
 										<div className='row'>
 											{user.Domains.map((domain) => (
 												<div key={domain.id} className='col-md-4 mb-2'>
-													<Badge color='info' className='w-100 text-start'>
+													<Badge rounded={1} color='primary' className='w-100 text-start py-4 px-4 fs-6'>
 														{domain.domain}
 													</Badge>
 												</div>

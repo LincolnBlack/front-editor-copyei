@@ -363,22 +363,12 @@ const Index: NextPage = () => {
 														</td>
 														<td>
 															<Button
-																color='info'
+																color='primary'
 																isLight
 																size='sm'
 																className='me-2'
 																onClick={() => router.push(`/admin/users/${i.id}`)}>
 																<Icon icon='Visibility' size='lg' />
-															</Button>
-															<Button
-																color='primary'
-																isLight
-																size='sm'
-																className='me-2'
-																onClick={() =>
-																	handleOpenModal(i.id.toString())
-																}>
-																<Icon icon='Edit' size='lg' />
 															</Button>
 															<Button
 																color='danger'

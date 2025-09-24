@@ -49,8 +49,8 @@ export interface User {
 	role: string;
 	paused_at: string | null;
 	active: boolean;
-	createdAt: string;
-	updatedAt: string;
+	created_at: string;
+	updated_at: string;
 	// Campos adicionais que podem vir do backend
 	description_plan?: string;
 	due_date?: string;
