@@ -94,6 +94,18 @@ export interface UseUsersFilters {
 	status?: string;
 }
 
+export interface CreateUserData {
+	name: string;
+	email: string;
+}
+
+export interface UpdateUserData {
+	name: string;
+	email: string;
+	role: string;
+	active: boolean;
+}
+
 class UserService {
 	async getUsers(filters: UseUsersFilters = {}): Promise<PaginatedUsers> {
 		try {
@@ -203,6 +215,46 @@ class UserService {
 					throw new Error('Token inválido ou expirado');
 				}
 				throw new Error(error.response?.data?.message || 'Erro ao ativar usuário');
+			}
+			throw error;
+		}
+	}
+
+	async createUser(userData: CreateUserData): Promise<User> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<{ data: User }>('/users/create', userData);
+			return response.data.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao criar usuário');
+			}
+			throw error;
+		}
+	}
+
+	async updateUser(id: string, userData: UpdateUserData): Promise<User> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.put<{ data: User }>(`/users/${id}`, userData);
+			return response.data.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao atualizar usuário');
 			}
 			throw error;
 		}

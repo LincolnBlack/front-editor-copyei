@@ -66,12 +66,10 @@ const UserFormModal: FC<IUserFormModalProps> = ({ id, isOpen, setIsOpen, onSucce
 		initialValues: {
 			name: user?.name || '',
 			email: user?.email || '',
-			password: '',
-			role: user?.role || 'user',
 			active: user?.active ?? true,
 		},
 		validate: (values) => {
-			const errors: { name?: string; email?: string; password?: string; role?: string } = {};
+			const errors: { name?: string; email?: string } = {};
 
 			if (!values.name) {
 				errors.name = 'Nome é obrigatório';
@@ -81,19 +79,6 @@ const UserFormModal: FC<IUserFormModalProps> = ({ id, isOpen, setIsOpen, onSucce
 				errors.email = 'Email é obrigatório';
 			} else if (!/\S+@\S+\.\S+/.test(values.email)) {
 				errors.email = 'Email inválido';
-			}
-
-			if (!values.role) {
-				errors.role = 'Role é obrigatória';
-			} else if (!['superadmin', 'user'].includes(values.role)) {
-				errors.role = 'Role deve ser superadmin ou user';
-			}
-
-			// Senha é obrigatória apenas para novos usuários
-			if (isNewUser && !values.password) {
-				errors.password = 'Senha é obrigatória';
-			} else if (isNewUser && values.password.length < 6) {
-				errors.password = 'Senha deve ter pelo menos 6 caracteres';
 			}
 
 			return errors;
@@ -106,7 +91,6 @@ const UserFormModal: FC<IUserFormModalProps> = ({ id, isOpen, setIsOpen, onSucce
 					const createData: CreateUserData = {
 						name: values.name,
 						email: values.email,
-						password: values.password,
 					};
 					await userService.createUser(createData);
 					showNotification(
@@ -121,7 +105,7 @@ const UserFormModal: FC<IUserFormModalProps> = ({ id, isOpen, setIsOpen, onSucce
 					const updateData: UpdateUserData = {
 						name: values.name,
 						email: values.email,
-						role: values.role,
+						role: user?.role || 'USER',
 						active: values.active,
 					};
 					await userService.updateUser(id, updateData);
@@ -135,6 +119,8 @@ const UserFormModal: FC<IUserFormModalProps> = ({ id, isOpen, setIsOpen, onSucce
 					);
 				}
 
+				// Reset do formulário após salvar
+				formik.resetForm();
 				setIsOpen(false);
 				if (onSuccess) {
 					onSuccess();
@@ -190,32 +176,6 @@ const UserFormModal: FC<IUserFormModalProps> = ({ id, isOpen, setIsOpen, onSucce
 								isValid={formik.isValid}
 							/>
 						</FormGroup>
-						{!isNewUser && (
-							<FormGroup id='role' label='Role' className='col-12'>
-								<Select
-									onChange={formik.handleChange}
-									value={formik.values.role}
-									ariaLabel='Role'
-									isTouched={formik.touched.role}
-									invalidFeedback={formik.errors.role}
-									isValid={formik.isValid}>
-									<option value='user'>User</option>
-									<option value='superadmin'>Super Admin</option>
-								</Select>
-							</FormGroup>
-						)}
-						{isNewUser && (
-							<FormGroup id='password' label='Senha' className='col-12'>
-								<Input
-									type='password'
-									onChange={formik.handleChange}
-									value={formik.values.password}
-									isTouched={formik.touched.password}
-									invalidFeedback={formik.errors.password}
-									isValid={formik.isValid}
-								/>
-							</FormGroup>
-						)}
 						{!isNewUser && (
 							<FormGroup className='col-12'>
 								<Label htmlFor='active'>Status</Label>
