@@ -22,6 +22,7 @@ import Card, { CardBody } from '../../../components/bootstrap/Card';
 import Modal, { ModalHeader, ModalBody, ModalFooter } from '../../../components/bootstrap/Modal';
 import { getFirstLetter } from '../../../helpers/helpers';
 import UserFormModal from './UserFormModal';
+import UploadSheetModal from './UploadSheetModal';
 import Badge from '../../../components/bootstrap/Badge';
 import userService, { User, PaginatedUsers } from '../../../services/userService';
 import { useAdminAuth } from '../../../hooks/useAdminAuth';
@@ -44,6 +45,7 @@ const Index: NextPage = () => {
 	const [statusFilter, setStatusFilter] = useState<string>('');
 	const [modalStatus, setModalStatus] = useState<boolean>(false);
 	const [selectedUserId, setSelectedUserId] = useState<string>('new');
+	const [uploadModalStatus, setUploadModalStatus] = useState<boolean>(false);
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
@@ -112,6 +114,18 @@ const Index: NextPage = () => {
 
 	const handleModalSuccess = () => {
 		fetchUsers(); // Recarregar a lista após criar/editar
+	};
+
+	const handleOpenUploadModal = () => {
+		setUploadModalStatus(true);
+	};
+
+	const handleCloseUploadModal = () => {
+		setUploadModalStatus(false);
+	};
+
+	const handleUploadSuccess = () => {
+		fetchUsers(); // Recarregar a lista após upload
 	};
 
 	const handleOpenDeleteModal = (user: User) => {
@@ -241,6 +255,14 @@ const Index: NextPage = () => {
 							Limpar filtros
 						</Button>
 					)}
+					<Button
+						icon='Upload'
+						color='success'
+						isLight
+						className='me-2'
+						onClick={handleOpenUploadModal}>
+						Upload Planilha
+					</Button>
 					<Button
 						icon='PersonAdd'
 						color='primary'
@@ -406,6 +428,12 @@ const Index: NextPage = () => {
 				isOpen={modalStatus}
 				setIsOpen={handleCloseModal}
 				onSuccess={handleModalSuccess}
+			/>
+
+			<UploadSheetModal
+				isOpen={uploadModalStatus}
+				setIsOpen={handleCloseUploadModal}
+				onSuccess={handleUploadSuccess}
 			/>
 
 			{/* Modal de confirmação de delete */}

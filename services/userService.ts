@@ -267,6 +267,37 @@ class UserService {
 		}
 	}
 
+	async uploadUsersFromSheet(file: File): Promise<{ message: string; created: number; errors: string[] }> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const formData = new FormData();
+			formData.append('file', file);
+
+			const response = await api.post<{ message: string; created: number; errors: string[] }>(
+				'/users/upload-sheet/create-many-users',
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				}
+			);
+			return response.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao fazer upload da planilha');
+			}
+			throw error;
+		}
+	}
+
 }
 
 const userService = new UserService();
