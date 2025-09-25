@@ -43,34 +43,64 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 	const pagination = () => {
 		let items = [];
 
-		let i = currentPage - 1;
-		while (i >= currentPage - 1 && i > 0) {
-			items.push(
-				<PaginationItem key={i} onClick={() => setCurrentPage(currentPage - 1)}>
-					{i}
-				</PaginationItem>,
-			);
-
-			i -= 1;
+		// Se há apenas 1 página, não mostrar números
+		if (totalPage <= 1) {
+			return items;
 		}
 
-		items = items.reverse();
+		// Determinar o range de páginas para mostrar
+		const maxVisiblePages = 5;
+		let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+		let endPage = Math.min(totalPage, startPage + maxVisiblePages - 1);
 
-		items.push(
-			<PaginationItem key={currentPage} isActive onClick={() => setCurrentPage(currentPage)}>
-				{currentPage}
-			</PaginationItem>,
-		);
+		// Ajustar startPage se estivermos no final
+		if (endPage - startPage + 1 < maxVisiblePages) {
+			startPage = Math.max(1, endPage - maxVisiblePages + 1);
+		}
 
-		i = currentPage + 1;
-		while (i <= currentPage + 1 && i <= totalPage) {
+		// Adicionar primeira página se não estiver no range
+		if (startPage > 1) {
 			items.push(
-				<PaginationItem key={i} onClick={() => setCurrentPage(currentPage + 1)}>
+				<PaginationItem key={1} onClick={() => setCurrentPage(1)}>
+					1
+				</PaginationItem>,
+			);
+			if (startPage > 2) {
+				items.push(
+					<PaginationItem key="ellipsis1" onClick={() => setCurrentPage(startPage - 1)}>
+						...
+					</PaginationItem>,
+				);
+			}
+		}
+
+		// Adicionar páginas no range
+		for (let i = startPage; i <= endPage; i++) {
+			items.push(
+				<PaginationItem 
+					key={i} 
+					isActive={i === currentPage}
+					onClick={() => setCurrentPage(i)}
+				>
 					{i}
 				</PaginationItem>,
 			);
+		}
 
-			i += 1;
+		// Adicionar última página se não estiver no range
+		if (endPage < totalPage) {
+			if (endPage < totalPage - 1) {
+				items.push(
+					<PaginationItem key="ellipsis2" onClick={() => setCurrentPage(endPage + 1)}>
+						...
+					</PaginationItem>,
+				);
+			}
+			items.push(
+				<PaginationItem key={totalPage} onClick={() => setCurrentPage(totalPage)}>
+					{totalPage}
+				</PaginationItem>,
+			);
 		}
 
 		return items;
@@ -95,37 +125,26 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 
 			<CardFooterRight className='d-flex'>
 				{totalPage > 1 && (
-					// @ts-ignore
 					<Pagination ariaLabel={label}>
 						<PaginationItem
 							isFirst
-							isDisabled={!(currentPage - 1 > 0)}
+							isDisabled={currentPage === 1}
 							onClick={() => setCurrentPage(1)}
 						/>
 						<PaginationItem
 							isPrev
-							isDisabled={!(currentPage - 1 > 0)}
+							isDisabled={currentPage === 1}
 							onClick={() => setCurrentPage(currentPage - 1)}
 						/>
-						{currentPage - 1 > 1 && (
-							<PaginationItem onClick={() => setCurrentPage(currentPage - 2)}>
-								...
-							</PaginationItem>
-						)}
 						{pagination()}
-						{currentPage + 1 < totalPage && (
-							<PaginationItem onClick={() => setCurrentPage(currentPage + 2)}>
-								...
-							</PaginationItem>
-						)}
 						<PaginationItem
 							isNext
-							isDisabled={!(currentPage + 1 <= totalPage)}
+							isDisabled={currentPage === totalPage}
 							onClick={() => setCurrentPage(currentPage + 1)}
 						/>
 						<PaginationItem
 							isLast
-							isDisabled={!(currentPage + 1 <= totalPage)}
+							isDisabled={currentPage === totalPage}
 							onClick={() => setCurrentPage(totalPage)}
 						/>
 					</Pagination>

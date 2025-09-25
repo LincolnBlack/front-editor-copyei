@@ -85,6 +85,17 @@ export interface PaginatedUsers {
 	};
 }
 
+// Interface para o formato de resposta do backend
+interface BackendPaginatedResponse {
+	data: User[];
+	pagination: {
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
+	};
+}
+
 
 export interface UseUsersFilters {
 	page?: number;
@@ -127,14 +138,20 @@ class UserService {
 				status,
 			}).toString();
 
-			const response = await api.get<PaginatedUsers>(`/users/list?${searchParams}`);
+			const response = await api.get<BackendPaginatedResponse>(`/users/list?${searchParams}`);
 
 			// Filtrar usuários não deletados no frontend
 			const filteredData = response.data.data.filter(user => user.deleted_at === null);
 			
+			// Mapear o formato do backend para o formato esperado pelo frontend
 			return {
-				...response.data,
-				data: filteredData
+				data: filteredData,
+				meta: {
+					current_page: response.data.pagination.page,
+					per_page: response.data.pagination.limit,
+					total: response.data.pagination.total,
+					last_page: response.data.pagination.totalPages
+				}
 			};
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
@@ -293,6 +310,37 @@ class UserService {
 					throw new Error('Token inválido ou expirado');
 				}
 				throw new Error(error.response?.data?.message || 'Erro ao fazer upload da planilha');
+			}
+			throw error;
+		}
+	}
+
+	async downloadUsersSheet(): Promise<void> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.get('/users/download-sheet/all', {
+				responseType: 'blob',
+			});
+
+			// Criar um link para download
+			const url = window.URL.createObjectURL(new Blob([response.data]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', 'usuarios.xlsx');
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao baixar planilha');
 			}
 			throw error;
 		}

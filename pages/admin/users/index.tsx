@@ -128,6 +128,15 @@ const Index: NextPage = () => {
 		fetchUsers(); // Recarregar a lista após upload
 	};
 
+	const handleDownloadSheet = async () => {
+		try {
+			await userService.downloadUsersSheet();
+		} catch (error) {
+			console.error('Erro ao baixar planilha:', error);
+			// Aqui você pode adicionar uma notificação de erro se desejar
+		}
+	};
+
 	const handleOpenDeleteModal = (user: User) => {
 		setUserToDelete(user);
 		setDeleteModalStatus(true);
@@ -262,6 +271,14 @@ const Index: NextPage = () => {
 						className='me-2'
 						onClick={handleOpenUploadModal}>
 						Upload Planilha
+					</Button>
+					<Button
+						icon='Download'
+						color='info'
+						isLight
+						className='me-2'
+						onClick={handleDownloadSheet}>
+						Baixar Planilha
 					</Button>
 					<Button
 						icon='PersonAdd'
