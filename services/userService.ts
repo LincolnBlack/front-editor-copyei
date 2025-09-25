@@ -48,6 +48,7 @@ export interface User {
 	email: string;
 	role: string;
 	paused_at: string | null;
+	deleted_at: string | null;
 	active: boolean;
 	created_at: string;
 	updated_at: string;
@@ -128,7 +129,13 @@ class UserService {
 
 			const response = await api.get<PaginatedUsers>(`/users/list?${searchParams}`);
 
-			return response.data;
+			// Filtrar usuários não deletados no frontend
+			const filteredData = response.data.data.filter(user => user.deleted_at === null);
+			
+			return {
+				...response.data,
+				data: filteredData
+			};
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
@@ -168,7 +175,7 @@ class UserService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			await api.delete(`/users/${id}`);
+			await api.delete(`/users/delete/${id}`);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {

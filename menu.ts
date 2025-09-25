@@ -6,14 +6,7 @@ export const dashboardPagesMenu = {
 		icon: 'Dashboard',
 		subMenu: null,
 		isRestricted: [],
-	},
-	example: {
-		id: 'example',
-		text: 'Example',
-		path: 'example',
-		icon: 'Extension',
-		isRestricted: ['example'],
-	},
+	}
 };
 
 export const authPages = {

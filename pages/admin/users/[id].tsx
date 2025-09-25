@@ -16,6 +16,7 @@ import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
 import Badge from '../../../components/bootstrap/Badge';
+import Modal, { ModalHeader, ModalBody, ModalFooter } from '../../../components/bootstrap/Modal';
 import userService, { User } from '../../../services/userService';
 import { useAdminAuth } from '../../../hooks/useAdminAuth';
 import { getFirstLetter } from '../../../helpers/helpers';
@@ -440,7 +441,40 @@ const UserDetails: NextPage = () => {
 			</Page>
 
 			{/* Modal de confirmação de delete */}
-			{/* TODO: Implementar modal de confirmação */}
+			<Modal
+				isOpen={deleteModalStatus}
+				setIsOpen={handleCloseDeleteModal}
+				size='lg'
+				titleId='delete-user-modal'>
+				<ModalHeader>
+					<h5 className='modal-title'>Confirmar exclusão</h5>
+				</ModalHeader>
+				<ModalBody>
+					<p>
+						Tem certeza que deseja excluir o usuário{' '}
+						<strong>{user?.name}</strong>?
+					</p>
+					<p className='text-muted mb-0'>Esta ação não pode ser desfeita.</p>
+				</ModalBody>
+				<ModalFooter>
+					<Button color='link' onClick={handleCloseDeleteModal} isDisable={deleteLoading}>
+						Cancelar
+					</Button>
+					<Button color='danger' onClick={handleConfirmDelete} isDisable={deleteLoading}>
+						{deleteLoading ? (
+							<>
+								<span
+									className='spinner-border spinner-border-sm me-2'
+									role='status'
+								/>
+								Excluindo...
+							</>
+						) : (
+							'Excluir usuário'
+						)}
+					</Button>
+				</ModalFooter>
+			</Modal>
 		</PageWrapper>
 	);
 };
