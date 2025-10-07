@@ -365,7 +365,6 @@ const Navigation = forwardRef<HTMLElement, INavigationProps>(
 			isMore: boolean | undefined,
 		) {
 			return Object.keys(data).map((item) => {
-
 				return data[item].path ? (
 					<Item
 						key={data[item].id}

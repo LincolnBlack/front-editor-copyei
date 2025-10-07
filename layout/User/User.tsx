@@ -12,6 +12,7 @@ import AuthContext from '../../context/authContext';
 
 import ThemeContext from '../../context/themeContext';
 import { getFirstLetter } from '../../helpers/helpers';
+import authService from '../../services/authService';
 
 const User = () => {
 	const { width } = useWindowSize();
@@ -52,7 +53,7 @@ const User = () => {
 			<Collapse isOpen={collapseStatus} className='user-menu'>
 				<nav aria-label='aside-bottom-user-menu'>
 					<div className='navigation'>
-						<div
+						{/* <div
 							role='presentation'
 							className='navigation-item cursor-pointer'
 							onClick={() =>
@@ -68,7 +69,7 @@ const User = () => {
 									<span className='navigation-text'>Perfil do usuário</span>
 								</span>
 							</span>
-						</div>
+						</div> */}
 						<div
 							role='presentation'
 							className='navigation-item cursor-pointer'
@@ -101,8 +102,8 @@ const User = () => {
 								if (setUser) {
 									setUser(null);
 								}
-								// Limpar token do localStorage
-								localStorage.removeItem('jwt_token');
+								// Efetuar logout padronizado
+								authService.logout();
 								if (
 									width < Number(process.env.NEXT_PUBLIC_MOBILE_BREAKPOINT_SIZE)
 								) {

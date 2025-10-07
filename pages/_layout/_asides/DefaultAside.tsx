@@ -22,12 +22,13 @@ const DefaultAside = () => {
 			<AsideBody>
 				<NavigationLine />
 				<Navigation menu={dashboardPagesMenu} id='aside-dashboard' />
-				{isAdmin && 
-				(<>
-					<NavigationLine />
-					<h6 className='navigation-title'>ADMIN</h6>
-					<Navigation menu={adminPagesMenu} id='aside-admin' />
-				</>)}
+				{isAdmin && (
+					<>
+						<NavigationLine />
+						<h6 className='navigation-title'>ADMIN</h6>
+						<Navigation menu={adminPagesMenu} id='aside-admin' />
+					</>
+				)}
 				<NavigationLine />
 			</AsideBody>
 			<AsideFoot>
