@@ -9,8 +9,8 @@ export const dashboardPagesMenu = {
 	},
 	pages: {
 		id: 'pages',
-		text: 'Pages',
-		path: '/pages',
+		text: 'Páginas',
+		path: 'pages',
 		icon: 'Widgets',
 		subMenu: null,
 	},
