@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
-import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useDarkMode from '../../hooks/useDarkMode';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
@@ -20,16 +19,26 @@ import PaginationButtons, { PER_COUNT } from '../../components/PaginationButtons
 import templateService, { UserTemplate } from '../../services/templateService';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 
+interface NewPageOption {
+	id: string;
+	title: string;
+	description: string;
+	icon: string;
+	color: string;
+	borderColor: string;
+	onClick: () => void;
+}
+
 const Pages: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
 	const { loading: authLoading, isAuthorized } = useAdminAuth();
-	const router = useRouter();
 
 	const [data, setData] = useState<UserTemplate[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 	const [templateToDelete, setTemplateToDelete] = useState<UserTemplate | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+	const [newPageModalStatus, setNewPageModalStatus] = useState<boolean>(false);
 
 	// Estados para paginação
 	const [currentPage, setCurrentPage] = useState<number>(1);
@@ -79,6 +88,85 @@ const Pages: NextPage = () => {
 		setTemplateToDelete(null);
 		setDeleteLoading(false);
 	};
+
+	const handleOpenNewPageModal = () => {
+		setNewPageModalStatus(true);
+	};
+
+	const handleCloseNewPageModal = () => {
+		setNewPageModalStatus(false);
+	};
+
+	// Lista de opções para criação de nova página
+	const newPageOptions: NewPageOption[] = [
+		{
+			id: 'copy',
+			title: 'Copiar uma página',
+			description: 'Gostou de uma página na web? copie e use como base para sua nova página',
+			icon: 'ContentCopy',
+			color: 'text-success',
+			borderColor: 'border-success',
+			onClick: () => {
+				// TODO: Implementar ação para copiar página
+				console.log('Copiar página');
+				handleCloseNewPageModal();
+			},
+		},
+		{
+			id: 'ai-generate',
+			title: 'Gerar uma nova página IA',
+			description:
+				'Use a inteligência artificial da copyei para criar uma página personalizada para você',
+			icon: 'AutoAwesome',
+			color: 'text-primary',
+			borderColor: 'border-primary',
+			onClick: () => {
+				// TODO: Implementar ação para gerar página com IA
+				console.log('Gerar página com IA');
+				handleCloseNewPageModal();
+			},
+		},
+		{
+			id: 'template',
+			title: 'Criar a partir de um template pronto',
+			description:
+				'Escolha entre vários templates que já foram testados e aprovados e faça a sua customização',
+			icon: 'FolderMatch',
+			color: 'text-info',
+			borderColor: 'border-info',
+			onClick: () => {
+				// TODO: Implementar ação para criar a partir de template
+				console.log('Criar a partir de template');
+				handleCloseNewPageModal();
+			},
+		},
+		{
+			id: 'import-html',
+			title: 'Importar uma página HTML',
+			description: 'Tem uma página HTML? importe e use como base para sua nova página',
+			icon: 'UploadFile',
+			color: 'text-secondary',
+			borderColor: 'border-secondary',
+			onClick: () => {
+				// TODO: Implementar ação para importar HTML
+				console.log('Importar página HTML');
+				handleCloseNewPageModal();
+			},
+		},
+		{
+			id: 'blank',
+			title: 'Criar uma página em branco',
+			description: 'Crie uma página em branco para você começar do zero',
+			icon: 'AddBox',
+			color: 'text-warning',
+			borderColor: 'border-warning',
+			onClick: () => {
+				// TODO: Implementar ação para criar página em branco
+				console.log('Criar página em branco');
+				handleCloseNewPageModal();
+			},
+		},
+	];
 
 	const handleDeleteTemplate = async () => {
 		if (!templateToDelete) return;
@@ -255,11 +343,7 @@ const Pages: NextPage = () => {
 						}>
 						Filtros
 					</Button>
-					<Button
-						icon='Add'
-						color='primary'
-						isLight
-						onClick={() => router.push('/pages/new')}>
+					<Button icon='Add' color='primary' isLight onClick={handleOpenNewPageModal}>
 						Nova página
 					</Button>
 				</SubHeaderRight>
@@ -486,6 +570,47 @@ const Pages: NextPage = () => {
 						) : (
 							'Excluir template'
 						)}
+					</Button>
+				</ModalFooter>
+			</Modal>
+
+			{/* Modal de criação de nova página */}
+			<Modal
+				isOpen={newPageModalStatus}
+				setIsOpen={handleCloseNewPageModal}
+				size='lg'
+				titleId='new-page-modal'>
+				<ModalHeader>
+					<h5 className='modal-title'>Criar nova página</h5>
+				</ModalHeader>
+				<ModalBody>
+					<div className='row g-3'>
+						{newPageOptions.map((option) => (
+							<div key={option.id} className='col-md-6'>
+								<Card
+									className={`h-100 cursor-pointer border-2 border-dashed ${option.borderColor}`}
+									onClick={option.onClick}>
+									<CardBody className='d-flex flex-column align-items-center text-center p-4'>
+										<div className='mb-3'>
+											<Icon
+												icon={option.icon}
+												size='3x'
+												className={option.color}
+											/>
+										</div>
+										<h6 className='fw-bold mb-2'>{option.title}</h6>
+										<p className='text-muted mb-0 small'>
+											{option.description}
+										</p>
+									</CardBody>
+								</Card>
+							</div>
+						))}
+					</div>
+				</ModalBody>
+				<ModalFooter>
+					<Button color='link' onClick={handleCloseNewPageModal}>
+						Cancelar
 					</Button>
 				</ModalFooter>
 			</Modal>
