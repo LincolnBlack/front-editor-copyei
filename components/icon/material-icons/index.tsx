@@ -637,6 +637,7 @@ export { default as FlutterDash } from './FlutterDash';
 export { default as FmdBad } from './FmdBad';
 export { default as FmdGood } from './FmdGood';
 export { default as Folder } from './Folder';
+export { default as FolderMatch } from './FolderMatch';
 export { default as FolderOpen } from './FolderOpen';
 export { default as FolderShared } from './FolderShared';
 export { default as FolderSpecial } from './FolderSpecial';
