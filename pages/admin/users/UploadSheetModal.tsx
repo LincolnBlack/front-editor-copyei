@@ -10,11 +10,7 @@ interface UploadSheetModalProps {
 	onSuccess: () => void;
 }
 
-const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
-	isOpen,
-	setIsOpen,
-	onSuccess,
-}) => {
+const UploadSheetModal: React.FC<UploadSheetModalProps> = ({ isOpen, setIsOpen, onSuccess }) => {
 	const [file, setFile] = useState<File | null>(null);
 	const [isDragOver, setIsDragOver] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -35,7 +31,9 @@ const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
 		];
 
 		const allowedExtensions = ['.xlsx', '.xls', '.csv'];
-		const fileExtension = selectedFile.name.toLowerCase().substring(selectedFile.name.lastIndexOf('.'));
+		const fileExtension = selectedFile.name
+			.toLowerCase()
+			.substring(selectedFile.name.lastIndexOf('.'));
 
 		if (allowedTypes.includes(selectedFile.type) || allowedExtensions.includes(fileExtension)) {
 			setFile(selectedFile);
@@ -57,7 +55,7 @@ const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
 	const handleDrop = (e: React.DragEvent) => {
 		e.preventDefault();
 		setIsDragOver(false);
-		
+
 		const droppedFile = e.dataTransfer.files[0];
 		if (droppedFile) {
 			handleFileSelect(droppedFile);
@@ -76,12 +74,12 @@ const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
 
 		try {
 			setUploading(true);
-			
+
 			const result = await userService.uploadUsersFromSheet(file);
-			
+
 			console.log('Upload realizado com sucesso:', result);
 			alert(`Upload concluído! ${result.created} usuários criados.`);
-			
+
 			onSuccess();
 			handleClose();
 		} catch (error) {
@@ -97,11 +95,7 @@ const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
 	};
 
 	return (
-		<Modal
-			isOpen={isOpen}
-			setIsOpen={handleClose}
-			size='lg'
-			titleId='upload-sheet-modal'>
+		<Modal isOpen={isOpen} setIsOpen={handleClose} size='lg' titleId='upload-sheet-modal'>
 			<ModalHeader>
 				<h5 className='modal-title'>Upload de Planilha</h5>
 			</ModalHeader>
@@ -109,18 +103,20 @@ const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
 				<div className='mb-3'>
 					<div
 						className={`border-2 border-dashed rounded p-4 text-center ${
-							isDragOver ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary bg-light'
+							isDragOver
+								? 'border-primary bg-primary bg-opacity-10'
+								: 'border-secondary bg-light'
 						}`}
 						onDragOver={handleDragOver}
 						onDragLeave={handleDragLeave}
 						onDrop={handleDrop}
 						onClick={handleClickUpload}
-						style={{ 
+						style={{
 							cursor: 'pointer',
 							backgroundColor: isDragOver ? 'rgba(13, 110, 253, 0.1)' : '#000000',
 							borderColor: isDragOver ? '#0d6efd' : '#6c757d',
 							borderStyle: 'dashed',
-							borderWidth: '2px'
+							borderWidth: '2px',
 						}}>
 						<input
 							ref={fileInputRef}
@@ -129,40 +125,35 @@ const UploadSheetModal: React.FC<UploadSheetModalProps> = ({
 							onChange={handleFileInputChange}
 							style={{ display: 'none' }}
 						/>
-						<Icon
-							icon='CloudUpload'
-							size='3x'
-							className='text-muted mb-3'
-						/>
+						<Icon icon='CloudUpload' size='3x' className='text-muted mb-3' />
 						<div className='h5 mb-2'>
 							{file ? file.name : 'Clique ou arraste o arquivo'}
 						</div>
 						<div className='text-muted'>
-							Formatos suportados: Apenas o formato XLSX é suportado.	
+							Formatos suportados: Apenas o formato XLSX é suportado.
 						</div>
 					</div>
 				</div>
-				
+
 				<div className='alert alert-primary text-white'>
 					<Icon icon='Lightbulb' className='me-2' />
-					<strong>Instruções:</strong> &nbsp; A planilha deve conter as colunas <code className='px-2 fw-bold fs-6 text-info'>nome</code> e <code className='px-2 fw-bold fs-6 text-info'>email</code>
+					<strong>Instruções:</strong> &nbsp; A planilha deve conter as colunas{' '}
+					<code className='px-2 fw-bold fs-6 text-info'>nome</code> e{' '}
+					<code className='px-2 fw-bold fs-6 text-info'>email</code>
 				</div>
 			</ModalBody>
 			<ModalFooter>
 				<Button color='link' onClick={handleClose} isDisable={uploading}>
 					Cancelar
 				</Button>
-				<Button 
-					color='primary' 
-					onClick={handleUpload} 
+				<Button
+					color='primary'
+					onClick={handleUpload}
 					isDisable={!file || uploading}
 					icon={uploading ? undefined : 'Upload'}>
 					{uploading ? (
 						<>
-							<span
-								className='spinner-border spinner-border-sm me-2'
-								role='status'
-							/>
+							<span className='spinner-border spinner-border-sm me-2' role='status' />
 							Fazendo upload...
 						</>
 					) : (

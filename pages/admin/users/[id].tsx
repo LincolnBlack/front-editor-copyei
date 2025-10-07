@@ -6,11 +6,7 @@ import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useDarkMode from '../../../hooks/useDarkMode';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
-import SubHeader, { 
-	SubHeaderLeft, 
-	SubHeaderRight,
-	SubheaderSeparator 
-} from '../../../layout/SubHeader/SubHeader';
+import SubHeader, { SubHeaderLeft, SubHeaderRight } from '../../../layout/SubHeader/SubHeader';
 import Icon from '../../../components/icon/Icon';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
@@ -77,8 +73,8 @@ const UserDetails: NextPage = () => {
 
 	useEffect(() => {
 		fetchUser();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
-
 
 	const handlePause = async () => {
 		if (!user) return;
@@ -175,9 +171,7 @@ const UserDetails: NextPage = () => {
 							<Icon icon='PersonOff' size='3x' className='text-muted mb-3' />
 							<h4>Usuário não encontrado</h4>
 							<p className='text-muted'>O usuário solicitado não foi encontrado.</p>
-							<Button
-								color='primary'
-								onClick={() => router.push('/admin/users')}>
+							<Button color='primary' onClick={() => router.push('/admin/users')}>
 								Voltar para lista
 							</Button>
 						</div>
@@ -222,15 +216,13 @@ const UserDetails: NextPage = () => {
 								/>
 								{user?.paused_at ? 'Reativando...' : 'Pausando...'}
 							</>
+						) : user?.paused_at ? (
+							'Reativar'
 						) : (
-							user?.paused_at ? 'Reativar' : 'Pausar'
+							'Pausar'
 						)}
 					</Button>
-					<Button
-						icon='Delete'
-						color='danger'
-						isLight
-						onClick={handleDelete}>
+					<Button icon='Delete' color='danger' isLight onClick={handleDelete}>
 						Excluir
 					</Button>
 				</SubHeaderRight>
@@ -276,14 +268,20 @@ const UserDetails: NextPage = () => {
 													<div className='flex-grow-1 ms-3'>
 														<div className='fs-5 mb-0 d-flex gap-2'>
 															{user?.paused_at ? (
-																<Badge color='danger'>Inativo</Badge>
+																<Badge color='danger'>
+																	Inativo
+																</Badge>
 															) : (
 																<Badge color='success'>Ativo</Badge>
 															)}
 															{user?.role === 'ADMIN' ? (
-																<Badge color='danger'>Administrador</Badge>
+																<Badge color='danger'>
+																	Administrador
+																</Badge>
 															) : (
-																<Badge color='primary'>Usuário</Badge>
+																<Badge color='primary'>
+																	Usuário
+																</Badge>
 															)}
 														</div>
 													</div>
@@ -294,7 +292,8 @@ const UserDetails: NextPage = () => {
 													<div className='flex-grow-1 ms-3'>
 														{user.description_plan && (
 															<div className='text-muted small mb-1'>
-																Descrição do plano: {user.description_plan}
+																Descrição do plano:{' '}
+																{user.description_plan}
 															</div>
 														)}
 														{user.due_date && (
@@ -304,7 +303,8 @@ const UserDetails: NextPage = () => {
 														)}
 														{user.usageDuration && (
 															<div className='text-muted small mb-1'>
-																Dias ativos: {user.usageDuration.days} dias
+																Dias ativos:{' '}
+																{user.usageDuration.days} dias
 															</div>
 														)}
 													</div>
@@ -319,11 +319,17 @@ const UserDetails: NextPage = () => {
 																ID: {user.id}
 															</div>
 															<div className='text-muted small'>
-																Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}
+																Criado em:{' '}
+																{new Date(
+																	user.created_at,
+																).toLocaleDateString('pt-BR')}
 															</div>
 															{user.paused_at && (
 																<div className='text-muted small'>
-																	Pausado em: {new Date(user.paused_at).toLocaleDateString('pt-BR')}
+																	Pausado em:{' '}
+																	{new Date(
+																		user.paused_at,
+																	).toLocaleDateString('pt-BR')}
 																</div>
 															)}
 														</div>
@@ -376,7 +382,7 @@ const UserDetails: NextPage = () => {
 								</div>
 							</CardBody>
 						</Card>
-						
+
 						{/* Conteúdo das tabs */}
 						{activeTab.label === 'Websites' && (
 							<Card className='mt-3'>
@@ -388,7 +394,9 @@ const UserDetails: NextPage = () => {
 												<div key={website.id} className='col-md-6 mb-3'>
 													<Card className='h-100'>
 														<CardBody>
-															<h6 className='card-title'>{website.title}</h6>
+															<h6 className='card-title'>
+																{website.title}
+															</h6>
 															<p className='card-text'>
 																<a
 																	href={website.clone_url}
@@ -405,14 +413,18 @@ const UserDetails: NextPage = () => {
 										</div>
 									) : (
 										<div className='text-center py-4'>
-											<Icon icon='Web' size='3x' className='text-muted mb-3' />
+											<Icon
+												icon='Web'
+												size='3x'
+												className='text-muted mb-3'
+											/>
 											<p className='text-muted'>Nenhum website encontrado</p>
 										</div>
 									)}
 								</CardBody>
 							</Card>
 						)}
-						
+
 						{activeTab.label === 'Domínios' && (
 							<Card className='mt-3'>
 								<CardBody>
@@ -421,7 +433,10 @@ const UserDetails: NextPage = () => {
 										<div className='row'>
 											{user.Domains.map((domain) => (
 												<div key={domain.id} className='col-md-4 mb-2'>
-													<Badge rounded={1} color='primary' className='w-100 text-start py-4 px-4 fs-6'>
+													<Badge
+														rounded={1}
+														color='primary'
+														className='w-100 text-start py-4 px-4 fs-6'>
 														{domain.domain}
 													</Badge>
 												</div>
@@ -429,7 +444,11 @@ const UserDetails: NextPage = () => {
 										</div>
 									) : (
 										<div className='text-center py-4'>
-											<Icon icon='Domain' size='3x' className='text-muted mb-3' />
+											<Icon
+												icon='Domain'
+												size='3x'
+												className='text-muted mb-3'
+											/>
 											<p className='text-muted'>Nenhum domínio encontrado</p>
 										</div>
 									)}
@@ -451,8 +470,7 @@ const UserDetails: NextPage = () => {
 				</ModalHeader>
 				<ModalBody>
 					<p>
-						Tem certeza que deseja excluir o usuário{' '}
-						<strong>{user?.name}</strong>?
+						Tem certeza que deseja excluir o usuário <strong>{user?.name}</strong>?
 					</p>
 					<p className='text-muted mb-0'>Esta ação não pode ser desfeita.</p>
 				</ModalBody>

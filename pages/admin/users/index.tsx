@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
@@ -37,7 +38,7 @@ const Index: NextPage = () => {
 	const [data, setData] = useState<User[]>([]);
 	const [paginationMeta, setPaginationMeta] = useState<PaginatedUsers['meta'] | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
-	
+
 	// Estados para os filtros
 	const [nameFilter, setNameFilter] = useState<string>('');
 	const [emailFilter, setEmailFilter] = useState<string>('');
@@ -50,11 +51,10 @@ const Index: NextPage = () => {
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-
 	const fetchUsers = async (page: number = currentPage, perPageCount: number = perPage) => {
 		try {
 			setLoading(true);
-			
+
 			// Converter o status para o formato esperado pelo backend
 			let backendStatus = '';
 			if (statusFilter === 'active') {
@@ -62,7 +62,7 @@ const Index: NextPage = () => {
 			} else if (statusFilter === 'inactive') {
 				backendStatus = 'Inativo';
 			}
-			
+
 			const result = await userService.getUsers({
 				page,
 				per_page: perPageCount,
@@ -216,7 +216,9 @@ const Index: NextPage = () => {
 								type='text'
 								placeholder='Filtrar por nome...'
 								value={nameFilter}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNameFilter(e.target.value)}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									setNameFilter(e.target.value)
+								}
 							/>
 						</div>
 						<div className='col-md-3'>
@@ -224,14 +226,18 @@ const Index: NextPage = () => {
 								type='email'
 								placeholder='Filtrar por email...'
 								value={emailFilter}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailFilter(e.target.value)}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									setEmailFilter(e.target.value)
+								}
 							/>
 						</div>
 						<div className='col-md-3'>
 							<Select
 								ariaLabel='Filtrar por função'
 								value={roleFilter}
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRoleFilter(e.target.value)}>
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+									setRoleFilter(e.target.value)
+								}>
 								<Option value=''>Todas as funções</Option>
 								<Option value='ADMIN'>Administrador</Option>
 								<Option value='USER'>Usuário</Option>
@@ -241,7 +247,9 @@ const Index: NextPage = () => {
 							<Select
 								ariaLabel='Filtrar por status'
 								value={statusFilter}
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}>
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+									setStatusFilter(e.target.value)
+								}>
 								<Option value=''>Todos os status</Option>
 								<Option value='active'>Ativo</Option>
 								<Option value='inactive'>Inativo</Option>
@@ -258,7 +266,7 @@ const Index: NextPage = () => {
 							style={{
 								backgroundColor: '#ffc107',
 								color: '#000000',
-								border: '1px solid #ffc107'
+								border: '1px solid #ffc107',
 							}}
 							onClick={handleClearFilters}>
 							Limpar filtros
@@ -388,7 +396,9 @@ const Index: NextPage = () => {
 																		: 'primary'
 																}
 																className='text-uppercase'>
-																{i.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+																{i.role === 'ADMIN'
+																	? 'Administrador'
+																	: 'Usuário'}
 															</Badge>
 														</td>
 														<td>
@@ -406,7 +416,11 @@ const Index: NextPage = () => {
 																isLight
 																size='sm'
 																className='me-2'
-																onClick={() => router.push(`/admin/users/${i.id}`)}>
+																onClick={() =>
+																	router.push(
+																		`/admin/users/${i.id}`,
+																	)
+																}>
 																<Icon icon='Visibility' size='lg' />
 															</Button>
 															<Button
