@@ -41,7 +41,7 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 	const totalPage = externalTotalPages ?? Math.ceil(totalItems / perPage);
 
 	const pagination = () => {
-		let items = [];
+		const items: React.JSX.Element[] = [];
 
 		// Se há apenas 1 página, não mostrar números
 		if (totalPage <= 1) {
@@ -51,7 +51,7 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 		// Determinar o range de páginas para mostrar
 		const maxVisiblePages = 5;
 		let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-		let endPage = Math.min(totalPage, startPage + maxVisiblePages - 1);
+		const endPage = Math.min(totalPage, startPage + maxVisiblePages - 1);
 
 		// Ajustar startPage se estivermos no final
 		if (endPage - startPage + 1 < maxVisiblePages) {
@@ -67,7 +67,7 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 			);
 			if (startPage > 2) {
 				items.push(
-					<PaginationItem key="ellipsis1" onClick={() => setCurrentPage(startPage - 1)}>
+					<PaginationItem key='ellipsis1' onClick={() => setCurrentPage(startPage - 1)}>
 						...
 					</PaginationItem>,
 				);
@@ -77,11 +77,10 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 		// Adicionar páginas no range
 		for (let i = startPage; i <= endPage; i++) {
 			items.push(
-				<PaginationItem 
-					key={i} 
+				<PaginationItem
+					key={i}
 					isActive={i === currentPage}
-					onClick={() => setCurrentPage(i)}
-				>
+					onClick={() => setCurrentPage(i)}>
 					{i}
 				</PaginationItem>,
 			);
@@ -91,7 +90,7 @@ const PaginationButtons: FC<IPaginationButtonsProps> = ({
 		if (endPage < totalPage) {
 			if (endPage < totalPage - 1) {
 				items.push(
-					<PaginationItem key="ellipsis2" onClick={() => setCurrentPage(endPage + 1)}>
+					<PaginationItem key='ellipsis2' onClick={() => setCurrentPage(endPage + 1)}>
 						...
 					</PaginationItem>,
 				);
