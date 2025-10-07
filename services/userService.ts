@@ -96,7 +96,6 @@ interface BackendPaginatedResponse {
 	};
 }
 
-
 export interface UseUsersFilters {
 	page?: number;
 	per_page?: number;
@@ -127,7 +126,14 @@ class UserService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const { page = 1, per_page = 10, name = '', email = '', role = '', status = '' } = filters;
+			const {
+				page = 1,
+				per_page = 10,
+				name = '',
+				email = '',
+				role = '',
+				status = '',
+			} = filters;
 
 			const searchParams = new URLSearchParams({
 				page: page.toString(),
@@ -141,8 +147,8 @@ class UserService {
 			const response = await api.get<BackendPaginatedResponse>(`/users/list?${searchParams}`);
 
 			// Filtrar usuários não deletados no frontend
-			const filteredData = response.data.data.filter(user => user.deleted_at === null);
-			
+			const filteredData = response.data.data.filter((user) => user.deleted_at === null);
+
 			// Mapear o formato do backend para o formato esperado pelo frontend
 			return {
 				data: filteredData,
@@ -150,8 +156,8 @@ class UserService {
 					current_page: response.data.pagination.page,
 					per_page: response.data.pagination.limit,
 					total: response.data.pagination.total,
-					last_page: response.data.pagination.totalPages
-				}
+					last_page: response.data.pagination.totalPages,
+				},
 			};
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
@@ -163,7 +169,6 @@ class UserService {
 			throw error;
 		}
 	}
-
 
 	async getUserById(id: string): Promise<User> {
 		try {
@@ -284,7 +289,9 @@ class UserService {
 		}
 	}
 
-	async uploadUsersFromSheet(file: File): Promise<{ message: string; created: number; errors: string[] }> {
+	async uploadUsersFromSheet(
+		file: File,
+	): Promise<{ message: string; created: number; errors: string[] }> {
 		try {
 			const token = localStorage.getItem('jwt_token');
 			if (!token) {
@@ -301,7 +308,7 @@ class UserService {
 					headers: {
 						'Content-Type': 'multipart/form-data',
 					},
-				}
+				},
 			);
 			return response.data;
 		} catch (error) {
@@ -309,7 +316,9 @@ class UserService {
 				if (error.response?.status === 401) {
 					throw new Error('Token inválido ou expirado');
 				}
-				throw new Error(error.response?.data?.message || 'Erro ao fazer upload da planilha');
+				throw new Error(
+					error.response?.data?.message || 'Erro ao fazer upload da planilha',
+				);
 			}
 			throw error;
 		}
@@ -345,7 +354,6 @@ class UserService {
 			throw error;
 		}
 	}
-
 }
 
 const userService = new UserService();
