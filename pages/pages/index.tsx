@@ -200,7 +200,14 @@ const Pages: NextPage = () => {
 														<Badge
 															color='primary'
 															className='text-uppercase'>
-															{i.type_creation}
+															{i.type_creation === 'GENERATED' &&
+																'Gerado pela IA'}
+															{i.type_creation === 'CLONE' &&
+																'Copiada'}
+															{i.type_creation === 'DRAG_AND_DROP' &&
+																'A partir de um template'}
+															{i.type_creation === 'UPLOAD' &&
+																'Importada'}
 														</Badge>
 													</td>
 													<td>
