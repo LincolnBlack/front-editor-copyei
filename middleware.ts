@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
 
 	// Verificar se a página atual é pública
 	const isPublicPage = publicPages.some((page) => pathname.startsWith(page));
-	
+
 	// Se for página pública, permitir acesso
 	if (isPublicPage) {
 		return NextResponse.next();
