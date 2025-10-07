@@ -6,7 +6,16 @@ const setCookie = (name: string, value: string, days: number = 7) => {
 
 	const expires = new Date();
 	expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-	document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+
+	// Configurar domínio baseado no ambiente
+	const isProduction = process.env.NODE_ENV === 'production';
+	const domain = isProduction ? '.copyei.com.br' : 'localhost';
+
+	// Configurar atributos de segurança
+	const secure = isProduction ? ';Secure' : '';
+	const sameSite = ';SameSite=Lax';
+
+	document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;domain=${domain}${secure}${sameSite}`;
 };
 
 const getCookie = (name: string): string | null => {
@@ -24,7 +33,13 @@ const getCookie = (name: string): string | null => {
 
 const removeCookie = (name: string) => {
 	if (typeof window === 'undefined') return;
-	document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+
+	// Configurar domínio baseado no ambiente (mesmo da função setCookie)
+	const isProduction = process.env.NODE_ENV === 'production';
+	const domain = isProduction ? '.copyei.com.br' : 'localhost';
+
+	// Remover cookie com o mesmo domínio usado para criar
+	document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`;
 };
 
 // Helper para decodificar JWT
@@ -35,8 +50,8 @@ const decodeJWT = (token: string) => {
 		const jsonPayload = decodeURIComponent(
 			atob(base64)
 				.split('')
-				.map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-				.join('')
+				.map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+				.join(''),
 		);
 		return JSON.parse(jsonPayload);
 	} catch (error) {
@@ -140,39 +155,49 @@ export interface User {
 			active: boolean;
 			createdAt: string;
 			updatedAt: string;
-		}
-	}
+		};
+	};
 }
 
 class AuthService {
 	async login(credentials: LoginCredentials): Promise<LoginResponse> {
 		try {
-			const response = await api.post<{ data: { accessToken: string; refreshToken: string } }>('/auth/signIn', credentials);
+			const response = await api.post<{
+				data: { accessToken: string; refreshToken: string };
+			}>('/auth/signIn', credentials);
 
 			// Extrair dados da resposta
 			const { accessToken, refreshToken } = response.data.data;
-			
+
 			// Decodificar JWT para extrair informações do usuário
 			const tokenPayload = decodeJWT(accessToken);
-			
+
 			// Criar objeto user a partir dos dados do token
 			const user = {
 				id: tokenPayload?.id || '',
 				email: tokenPayload?.email || credentials.email,
 				name: tokenPayload?.name || '',
 				role: tokenPayload?.role || '',
-				actions: tokenPayload?.actions || {}
+				actions: tokenPayload?.actions || {},
 			};
 
 			// Salvar tokens no localStorage e cookies
 			localStorage.setItem('jwt_token', accessToken);
 			localStorage.setItem('refresh_token', refreshToken);
+
+			// Salvar token no cookie com logs para debug
+			console.log('Salvando token no cookie...');
 			setCookie('jwt_token', accessToken, 7); // 7 dias
+
+			// Verificar se o cookie foi salvo
+			const savedCookie = getCookie('jwt_token');
+			console.log('Cookie salvo:', savedCookie ? 'Sim' : 'Não');
+			console.log('Valor do cookie:', savedCookie);
 
 			return {
 				accessToken,
 				refreshToken,
-				user
+				user,
 			};
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
@@ -195,14 +220,15 @@ class AuthService {
 		}
 	}
 
-	async resetPassword(credentials: ConfirmPasswordResetCredentials, body: ConfirmPasswordResetBody): Promise<void> {
+	async resetPassword(
+		credentials: ConfirmPasswordResetCredentials,
+		body: ConfirmPasswordResetBody,
+	): Promise<void> {
 		try {
-			await api.post('/auth/recoveryVerify/' + credentials.token, body);
+			await api.post(`/auth/recoveryVerify/${credentials.token}`, body);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				throw new Error(
-					error.response?.data?.message || 'Erro ao redefinir senha',
-				);
+				throw new Error(error.response?.data?.message || 'Erro ao redefinir senha');
 			}
 			throw error;
 		}
@@ -219,8 +245,25 @@ class AuthService {
 		if (typeof window === 'undefined') {
 			return null;
 		}
-		// Prioriza localStorage, mas também verifica cookies
-		return localStorage.getItem('jwt_token') || getCookie('jwt_token');
+
+		// Verificar localStorage primeiro
+		const localToken = localStorage.getItem('jwt_token');
+		if (localToken) {
+			console.log('Token encontrado no localStorage');
+			return localToken;
+		}
+
+		// Se não encontrou no localStorage, verificar cookies
+		const cookieToken = getCookie('jwt_token');
+		if (cookieToken) {
+			console.log('Token encontrado no cookie, salvando no localStorage');
+			// Salvar no localStorage para futuras consultas
+			localStorage.setItem('jwt_token', cookieToken);
+			return cookieToken;
+		}
+
+		console.log('Nenhum token encontrado');
+		return null;
 	}
 
 	isAuthenticated(): boolean {
