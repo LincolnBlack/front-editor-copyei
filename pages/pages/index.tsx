@@ -16,7 +16,8 @@ import Option from '../../components/bootstrap/Option';
 import { getFirstLetter } from '../../helpers/helpers';
 import Badge from '../../components/bootstrap/Badge';
 import PaginationButtons, { PER_COUNT } from '../../components/PaginationButtons';
-import templateService, { UserTemplate } from '../../services/templateService';
+import templateService, { UserTemplate, DeployTemplateData } from '../../services/templateService';
+import domainService, { Domain } from '../../services/domainService';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 
 interface NewPageOption {
@@ -39,6 +40,15 @@ const Pages: NextPage = () => {
 	const [templateToDelete, setTemplateToDelete] = useState<UserTemplate | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [newPageModalStatus, setNewPageModalStatus] = useState<boolean>(false);
+
+	// Estados para modal de publicação
+	const [publishModalStatus, setPublishModalStatus] = useState<boolean>(false);
+	const [templateToPublish, setTemplateToPublish] = useState<UserTemplate | null>(null);
+	const [availableDomains, setAvailableDomains] = useState<Domain[]>([]);
+	const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
+	const [subdomain, setSubdomain] = useState<string>('');
+	const [publishLoading, setPublishLoading] = useState<boolean>(false);
+	const [domainsLoading, setDomainsLoading] = useState<boolean>(false);
 
 	// Estados para paginação
 	const [currentPage, setCurrentPage] = useState<number>(1);
@@ -198,9 +208,70 @@ const Pages: NextPage = () => {
 		}
 	};
 
-	const handlePublish = (template: UserTemplate) => {
-		// TODO: Implementar lógica de publicação
-		console.log('Publicar template:', template);
+	const handlePublish = async (template: UserTemplate) => {
+		setTemplateToPublish(template);
+		setPublishModalStatus(true);
+		setDomainsLoading(true);
+		try {
+			// Buscar domínios disponíveis
+			const domainsData = await domainService.getDomains();
+
+			// Filtrar domínios disponíveis
+			const available = domainService.getAvailableDomains(domainsData);
+			setAvailableDomains(available);
+
+			// Se não há domínios disponíveis, não mostrar seleção
+			if (available.length === 0) {
+				setSelectedDomain(null);
+			}
+		} catch (error) {
+			console.error('Erro ao buscar domínios:', error);
+			alert('Erro ao carregar domínios. Tente novamente.');
+		} finally {
+			setDomainsLoading(false);
+		}
+	};
+
+	const handleClosePublishModal = () => {
+		setPublishModalStatus(false);
+		setTemplateToPublish(null);
+		setSelectedDomain(null);
+		setSubdomain('');
+		setPublishLoading(false);
+		setDomainsLoading(false);
+	};
+
+	const handlePublishTemplate = async () => {
+		if (!templateToPublish || !subdomain.trim()) {
+			alert('Por favor, preencha o subdomínio.');
+			return;
+		}
+
+		try {
+			setPublishLoading(true);
+
+			// Gerar título a partir do subdomínio
+			const title = subdomain.trim().replace(/\s+/g, '-');
+
+			// Preparar dados para deploy
+			const deployData: DeployTemplateData = {
+				title,
+				subdomain: subdomain.trim(),
+				ownDomain: selectedDomain !== null,
+				domainId2: selectedDomain ? selectedDomain.id : null,
+			};
+
+			// Fazer deploy
+			await templateService.deployTemplate(templateToPublish.id.toString(), deployData);
+
+			alert('Template publicado com sucesso!');
+			handleClosePublishModal();
+		} catch (error) {
+			console.error('Erro ao publicar template:', error);
+			alert('Erro ao publicar template. Tente novamente.');
+		} finally {
+			setPublishLoading(false);
+		}
 	};
 
 	const handleEdit = (template: UserTemplate) => {
@@ -611,6 +682,102 @@ const Pages: NextPage = () => {
 				<ModalFooter>
 					<Button color='link' onClick={handleCloseNewPageModal}>
 						Cancelar
+					</Button>
+				</ModalFooter>
+			</Modal>
+
+			{/* Modal de publicação */}
+			<Modal
+				isOpen={publishModalStatus}
+				setIsOpen={handleClosePublishModal}
+				size='lg'
+				titleId='publish-modal'>
+				<ModalHeader>
+					<h5 className='modal-title'>Publicar template</h5>
+				</ModalHeader>
+				<ModalBody>
+					{domainsLoading ? (
+						<div className='d-flex justify-content-center align-items-center py-4'>
+							<div className='spinner-border text-primary' role='status'>
+								<span className='visually-hidden'>Carregando domínios...</span>
+							</div>
+						</div>
+					) : (
+						<>
+							{/* Seleção de domínio */}
+							{availableDomains.length > 0 && (
+								<div className='mb-4'>
+									<label htmlFor='domain-select' className='form-label'>
+										Selecione um domínio
+									</label>
+									<Select
+										id='domain-select'
+										ariaLabel='Selecionar domínio'
+										value={selectedDomain?.id?.toString() || ''}
+										onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+											const domainId = parseInt(e.target.value);
+											const domain = availableDomains.find(
+												(d) => d.id === domainId,
+											);
+											setSelectedDomain(domain || null);
+										}}>
+										<Option value=''>Usar domínio padrão (copy-ei.com)</Option>
+										{availableDomains.map((domain) => (
+											<Option key={domain.id} value={domain.id}>
+												{domain.domain}
+											</Option>
+										))}
+									</Select>
+								</div>
+							)}
+
+							{/* Criação de subdomínio */}
+							<div className='mb-3'>
+								<h6 className='fw-bold mb-2'>Criar um subdomínio:</h6>
+								<p className='text-muted mb-3'>
+									O subdomínio será usado para acessar o site publicado.
+									<br />
+									Exemplo: pagina.
+									{selectedDomain ? selectedDomain.domain : 'copy-ei.com'}
+								</p>
+								<label htmlFor='subdomain-input' className='form-label'>
+									Digite o subdomínio
+								</label>
+								<Input
+									id='subdomain-input'
+									type='text'
+									placeholder='Ex: minha-pagina'
+									value={subdomain}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+										setSubdomain(e.target.value)
+									}
+								/>
+							</div>
+						</>
+					)}
+				</ModalBody>
+				<ModalFooter>
+					<Button
+						color='link'
+						onClick={handleClosePublishModal}
+						isDisable={publishLoading || domainsLoading}>
+						Cancelar
+					</Button>
+					<Button
+						color='primary'
+						onClick={handlePublishTemplate}
+						isDisable={publishLoading || domainsLoading || !subdomain.trim()}>
+						{publishLoading ? (
+							<>
+								<span
+									className='spinner-border spinner-border-sm me-2'
+									role='status'
+								/>
+								Publicando...
+							</>
+						) : (
+							'Publicar'
+						)}
 					</Button>
 				</ModalFooter>
 			</Modal>
