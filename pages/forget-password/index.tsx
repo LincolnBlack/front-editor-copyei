@@ -94,7 +94,10 @@ const ForgetPassword: NextPage = () => {
 										<div
 											className={classNames(
 												'd-flex align-items-center justify-content-center p-2 py-3 rounded-3 w-auto',
-												{'bg-dark': !darkModeStatus, 'bg-light': darkModeStatus}
+												{
+													'bg-dark': !darkModeStatus,
+													'bg-light': darkModeStatus,
+												},
 											)}>
 											<Logo width={150} height={72} invert={true} />
 										</div>

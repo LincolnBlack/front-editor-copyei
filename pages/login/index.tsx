@@ -156,7 +156,10 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 										<div
 											className={classNames(
 												'd-flex align-items-center justify-content-center p-2 py-3 rounded-3 w-auto',
-												{'bg-dark': !darkModeStatus, 'bg-light': darkModeStatus}
+												{
+													'bg-dark': !darkModeStatus,
+													'bg-light': darkModeStatus,
+												},
 											)}>
 											<Logo width={180} height={90} invert={true} />
 										</div>
@@ -292,7 +295,7 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 											</div>
 											<div className='col-12'>
 												<Button
-													color='dark'
+													color='primary'
 													className='w-100 py-3'
 													type='button'
 													onClick={(e: React.MouseEvent) => {

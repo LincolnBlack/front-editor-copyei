@@ -25,7 +25,6 @@ const passwordRecovery: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false);
-	
 
 	const handleOnClick = useCallback(() => router.push('/login'), [router]);
 
@@ -73,12 +72,15 @@ const passwordRecovery: NextPage = () => {
 
 			setIsLoading(true);
 			try {
-				await authService.resetPassword({
-					token: token,
-				}, {
-					password: values.password,
-					repeatPassword: values.repeatPassword,
-				});
+				await authService.resetPassword(
+					{
+						token: token,
+					},
+					{
+						password: values.password,
+						repeatPassword: values.repeatPassword,
+					},
+				);
 				setIsPasswordReset(true);
 			} catch (error) {
 				if (error instanceof Error) {
@@ -187,7 +189,7 @@ const passwordRecovery: NextPage = () => {
 													'': darkModeStatus,
 												},
 											)}>
-											<Logo width={150} height={72} invert={true}/>
+											<Logo width={150} height={72} invert={true} />
 										</div>
 									</Link>
 								</div>
@@ -333,10 +335,10 @@ const passwordRecovery: NextPage = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
-    props: {
-        // @ts-ignore
-        ...(await serverSideTranslations(locale ?? 'en', ['common', 'menu'])),
-    },
+	props: {
+		// @ts-ignore
+		...(await serverSideTranslations(locale ?? 'en', ['common', 'menu'])),
+	},
 });
 
 export default passwordRecovery;
