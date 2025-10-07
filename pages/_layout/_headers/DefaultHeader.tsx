@@ -6,7 +6,7 @@ import useDarkMode from '../../../hooks/useDarkMode';
 
 const DefaultHeader = ({ title }: { title?: string }) => {
 	const { darkModeStatus } = useDarkMode();
-
+	console.log(title);
 	return (
 		<Header>
 			<HeaderLeft>

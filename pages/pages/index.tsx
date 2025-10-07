@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useDarkMode from '../../hooks/useDarkMode';
@@ -12,8 +11,12 @@ import Button from '../../components/bootstrap/Button';
 import Page from '../../layout/Page/Page';
 import Card, { CardBody } from '../../components/bootstrap/Card';
 import Modal, { ModalHeader, ModalBody, ModalFooter } from '../../components/bootstrap/Modal';
+import Input from '../../components/bootstrap/forms/Input';
+import Select from '../../components/bootstrap/forms/Select';
+import Option from '../../components/bootstrap/Option';
 import { getFirstLetter } from '../../helpers/helpers';
 import Badge from '../../components/bootstrap/Badge';
+import PaginationButtons, { PER_COUNT } from '../../components/PaginationButtons';
 import templateService, { UserTemplate } from '../../services/templateService';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 
@@ -27,6 +30,17 @@ const Pages: NextPage = () => {
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 	const [templateToDelete, setTemplateToDelete] = useState<UserTemplate | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+	// Estados para paginação
+	const [currentPage, setCurrentPage] = useState<number>(1);
+	const [perPage, setPerPage] = useState<number>(PER_COUNT['10']);
+
+	// Estados para filtros
+	const [nameFilter, setNameFilter] = useState<string>('');
+	const [typeFilter, setTypeFilter] = useState<string>('');
+	const [startDateFilter, setStartDateFilter] = useState<string>('');
+	const [endDateFilter, setEndDateFilter] = useState<string>('');
+	const [filtersModalStatus, setFiltersModalStatus] = useState<boolean>(false);
 
 	const fetchTemplates = useCallback(async () => {
 		try {
@@ -49,6 +63,11 @@ const Pages: NextPage = () => {
 	useEffect(() => {
 		fetchTemplates();
 	}, [fetchTemplates]);
+
+	// Resetar página quando filtros mudarem
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [nameFilter, typeFilter, startDateFilter, endDateFilter]);
 
 	const handleOpenDeleteModal = (template: UserTemplate) => {
 		setTemplateToDelete(template);
@@ -105,6 +124,80 @@ const Pages: NextPage = () => {
 		location.href = `${process.env.NEXT_PUBLIC_EDITOR_URL}/${template.id}`;
 	};
 
+	// Funções para gerenciar filtros
+	const handleOpenFiltersModal = () => {
+		setFiltersModalStatus(true);
+	};
+
+	const handleCloseFiltersModal = () => {
+		setFiltersModalStatus(false);
+	};
+
+	const handleClearFilters = () => {
+		setNameFilter('');
+		setTypeFilter('');
+		setStartDateFilter('');
+		setEndDateFilter('');
+		setCurrentPage(1);
+	};
+
+	// Verificar se há filtros ativos
+	const hasActiveFilters = nameFilter || typeFilter || startDateFilter || endDateFilter;
+
+	// Lógica de filtros e ordenação
+	const filteredAndSortedData = useMemo(() => {
+		let filtered = [...data];
+
+		// Filtrar por nome
+		if (nameFilter) {
+			filtered = filtered.filter((template) =>
+				template.title.toLowerCase().includes(nameFilter.toLowerCase()),
+			);
+		}
+
+		// Filtrar por tipo
+		if (typeFilter) {
+			filtered = filtered.filter((template) => template.type_creation === typeFilter);
+		}
+
+		// Filtrar por data
+		if (startDateFilter) {
+			const startDate = new Date(startDateFilter);
+			filtered = filtered.filter((template) => {
+				const templateDate = new Date(template.created_at);
+				return templateDate >= startDate;
+			});
+		}
+
+		if (endDateFilter) {
+			const endDate = new Date(endDateFilter);
+			endDate.setHours(23, 59, 59, 999); // Incluir todo o dia
+			filtered = filtered.filter((template) => {
+				const templateDate = new Date(template.created_at);
+				return templateDate <= endDate;
+			});
+		}
+
+		// Ordenar por data de criação (mais recente primeiro)
+		filtered.sort((a, b) => {
+			const dateA = new Date(a.created_at);
+			const dateB = new Date(b.created_at);
+			return dateB.getTime() - dateA.getTime();
+		});
+
+		return filtered;
+	}, [data, nameFilter, typeFilter, startDateFilter, endDateFilter]);
+
+	// Calcular dados paginados
+	const paginatedData = useMemo(() => {
+		const startIndex = (currentPage - 1) * perPage;
+		const endIndex = startIndex + perPage;
+		return filteredAndSortedData.slice(startIndex, endIndex);
+	}, [filteredAndSortedData, currentPage, perPage]);
+
+	// Calcular total de páginas
+	const totalPages = Math.ceil(filteredAndSortedData.length / perPage);
+
 	// Se está carregando a autenticação, mostra loading
 	if (authLoading) {
 		return (
@@ -125,14 +218,43 @@ const Pages: NextPage = () => {
 
 	return (
 		<PageWrapper>
-			<Head>
-				<title>Páginas</title>
-			</Head>
 			<SubHeader>
 				<SubHeaderLeft>
-					<h4 className='mb-0'>Páginas</h4>
+					<Input
+						type='text'
+						placeholder='Buscar por nome...'
+						value={nameFilter}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+							setNameFilter(e.target.value)
+						}
+						style={{ minWidth: '300px', maxWidth: '500px' }}
+					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
+					{hasActiveFilters && (
+						<Button
+							icon='Clear'
+							color='warning'
+							className='me-2'
+							style={{
+								backgroundColor: '#ffc107',
+								color: '#000000',
+								border: '1px solid #ffc107',
+							}}
+							onClick={handleClearFilters}>
+							Limpar filtros
+						</Button>
+					)}
+					<Button
+						icon='FilterList'
+						color={filtersModalStatus ? 'primary' : 'info'}
+						isLight={!filtersModalStatus}
+						className='me-2'
+						onClick={
+							filtersModalStatus ? handleCloseFiltersModal : handleOpenFiltersModal
+						}>
+						Filtros
+					</Button>
 					<Button
 						icon='Add'
 						color='primary'
@@ -145,6 +267,64 @@ const Pages: NextPage = () => {
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
+						{/* Card de Filtros */}
+						{filtersModalStatus && (
+							<Card className='mb-3'>
+								<CardBody>
+									<div className='row g-3'>
+										<div className='col-md-4'>
+											<label htmlFor='type-filter' className='form-label'>
+												Tipo de criação
+											</label>
+											<Select
+												id='type-filter'
+												ariaLabel='Filtrar por tipo'
+												value={typeFilter}
+												onChange={(
+													e: React.ChangeEvent<HTMLSelectElement>,
+												) => setTypeFilter(e.target.value)}>
+												<Option value=''>Todos os tipos</Option>
+												<Option value='GENERATED'>Gerado pela IA</Option>
+												<Option value='CLONE'>Copiada</Option>
+												<Option value='DRAG_AND_DROP'>
+													A partir de um template
+												</Option>
+												<Option value='UPLOAD'>Importada</Option>
+											</Select>
+										</div>
+										<div className='col-md-4'>
+											<label
+												htmlFor='start-date-filter'
+												className='form-label'>
+												Data de início
+											</label>
+											<Input
+												id='start-date-filter'
+												type='date'
+												value={startDateFilter}
+												onChange={(
+													e: React.ChangeEvent<HTMLInputElement>,
+												) => setStartDateFilter(e.target.value)}
+											/>
+										</div>
+										<div className='col-md-4'>
+											<label htmlFor='end-date-filter' className='form-label'>
+												Data de fim
+											</label>
+											<Input
+												id='end-date-filter'
+												type='date'
+												value={endDateFilter}
+												onChange={(
+													e: React.ChangeEvent<HTMLInputElement>,
+												) => setEndDateFilter(e.target.value)}
+											/>
+										</div>
+									</div>
+								</CardBody>
+							</Card>
+						)}
+
 						<Card stretch>
 							<CardBody isScrollable className='table-responsive'>
 								{loading ? (
@@ -164,7 +344,7 @@ const Pages: NextPage = () => {
 											</tr>
 										</thead>
 										<tbody>
-											{data.map((i) => (
+											{paginatedData.map((i) => (
 												<tr key={i.id}>
 													<td>
 														<div className='d-flex align-items-center'>
@@ -189,9 +369,6 @@ const Pages: NextPage = () => {
 															<div className='flex-grow-1'>
 																<div className='fs-6 fw-bold'>
 																	{i.title}
-																</div>
-																<div className='text-muted small'>
-																	{i.object_folder}
 																</div>
 															</div>
 														</div>
@@ -262,6 +439,16 @@ const Pages: NextPage = () => {
 									</table>
 								)}
 							</CardBody>
+							<PaginationButtons
+								data={filteredAndSortedData}
+								label='páginas'
+								setCurrentPage={setCurrentPage}
+								currentPage={currentPage}
+								perPage={perPage}
+								setPerPage={setPerPage}
+								totalItems={filteredAndSortedData.length}
+								totalPages={totalPages}
+							/>
 						</Card>
 					</div>
 				</div>
