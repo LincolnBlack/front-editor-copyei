@@ -77,6 +77,20 @@ const Pages: NextPage = () => {
 		}
 	};
 
+	const handleVisualize = async (template: UserTemplate) => {
+		try {
+			// Obter o link pré-assinado para visualização
+			const presignedUrl = await templateService.getPresignedUrl(template.id.toString());
+
+			// Abrir a página em uma nova aba
+			window.open(presignedUrl, '_blank');
+		} catch (error) {
+			console.error('Erro ao visualizar template:', error);
+			// Aqui você pode adicionar uma notificação de erro se desejar
+			alert('Erro ao abrir visualização da página. Tente novamente.');
+		}
+	};
+
 	const handlePublish = (template: UserTemplate) => {
 		// TODO: Implementar lógica de publicação
 		console.log('Publicar template:', template);
@@ -145,6 +159,7 @@ const Pages: NextPage = () => {
 											<tr>
 												<th>Título</th>
 												<th>Tipo</th>
+												<th>Data da criação</th>
 												<th>Ações</th>
 											</tr>
 										</thead>
@@ -173,7 +188,7 @@ const Pages: NextPage = () => {
 															</div>
 															<div className='flex-grow-1'>
 																<div className='fs-6 fw-bold'>
-																	{i.title} {i.id}
+																	{i.title}
 																</div>
 																<div className='text-muted small'>
 																	{i.object_folder}
@@ -189,13 +204,32 @@ const Pages: NextPage = () => {
 														</Badge>
 													</td>
 													<td>
+														{/* Adicionar hora também */}
+														{new Date(i.created_at).toLocaleDateString(
+															'pt-BR',
+														)}{' '}
+														{new Date(i.created_at).toLocaleTimeString(
+															'pt-BR',
+														)}
+													</td>
+													<td>
 														<Button
-															color='success'
+															color='primary'
+															isLight
+															size='sm'
+															className='me-2'
+															onClick={() => handleVisualize(i)}>
+															<Icon icon='Visibility' size='lg' />{' '}
+															Visualizar
+														</Button>
+														<Button
+															color='primary'
 															isLight
 															size='sm'
 															className='me-2'
 															onClick={() => handlePublish(i)}>
-															<Icon icon='Publish' size='lg' />
+															<Icon icon='Publish' size='lg' />{' '}
+															Publicar
 														</Button>
 														<Button
 															color='primary'

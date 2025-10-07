@@ -74,6 +74,12 @@ export interface UpdateTemplateData {
 	status: string;
 }
 
+export interface PresignedUrlResponse {
+	data: {
+		presignUrl: string;
+	};
+}
+
 class TemplateService {
 	async getTemplates(): Promise<UserTemplate[]> {
 		try {
@@ -199,6 +205,34 @@ class TemplateService {
 				}
 				throw new Error(
 					error.response?.data?.message || 'Erro ao alterar visibilidade do template',
+				);
+			}
+			throw error;
+		}
+	}
+
+	async getPresignedUrl(templateId: string): Promise<string> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<PresignedUrlResponse>(
+				`/templates/${templateId}/presign-urls`,
+				{
+					filePath: 'index.html',
+					type: 'get'
+				}
+			);
+			return response.data.data.presignUrl;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(
+					error.response?.data?.message || 'Erro ao obter link de visualização',
 				);
 			}
 			throw error;
