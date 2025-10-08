@@ -136,7 +136,7 @@ class TemplateService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			await api.delete(`/templates/user/${id}`);
+			await api.delete(`/templates/${id}`);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
