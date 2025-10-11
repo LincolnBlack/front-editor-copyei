@@ -23,14 +23,14 @@ const templates: Template[] = [
 		id: 'lpcompleta',
 		name: 'Landing Page Completa',
 		description: 'estrutura completa de uma landing page com seções personalizadas',
-		thumbnail: 'http://localhost:3000/images/print_da_tela.png',
+		thumbnail: '/images/landing_page.png',
 		html: `
   <!DOCTYPE html>
   <html lang="pt-BR">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Clínica Odontológica Premium</title>
+      <title>Landing Page Completa</title>
       <link
         href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
         rel="stylesheet"
@@ -306,14 +306,14 @@ const templates: Template[] = [
 		id: 'startup',
 		name: 'Startup Modern',
 		description: 'Template moderno para startups e empresas de tecnologia',
-		thumbnail: null,
+		thumbnail: '/images/startup_modern.png',
 		html: `
       <!DOCTYPE html>
       <html lang="pt-BR">
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>E-commerce</title>
+          <title>Startup Modern</title>
           <link
             href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
             rel="stylesheet"
@@ -357,14 +357,14 @@ const templates: Template[] = [
 		id: 'saas',
 		name: 'SaaS Business',
 		description: 'Perfeito para produtos SaaS e serviços online',
-		thumbnail: null,
+		thumbnail: '/images/saas_business.png',
 		html: `
       <!DOCTYPE html>
       <html lang="pt-BR">
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>E-commerce</title>
+          <title>SaaS Business</title>
           <link
             href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
             rel="stylesheet"
@@ -420,7 +420,7 @@ const templates: Template[] = [
 		id: 'ecommerce',
 		name: 'E-commerce',
 		description: 'Template otimizado para vendas online',
-		thumbnail: null,
+		thumbnail: '/images/ecommerce.png',
 		html: `
       <!DOCTYPE html>
       <html lang="pt-BR">
@@ -494,7 +494,6 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
 
 	const handleTemplateSelect = (template: Template) => {
 		setSelectedTemplate(template);
-		setPageName(template.name); // Pré-preenche com o nome do template
 	};
 
 	const handleCreatePage = async () => {
@@ -525,7 +524,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
 	return (
 		<Modal isOpen={isOpen} setIsOpen={handleClose} size='xl' titleId='template-modal'>
 			<ModalHeader>
-				<h5 className='modal-title'>Escolher Template</h5>
+				<h5 className='modal-title px-3 pt-3'>Escolher Template</h5>
 			</ModalHeader>
 			<ModalBody>
 				{!selectedTemplate ? (
@@ -568,52 +567,239 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
 						))}
 					</div>
 				) : (
-					<div className='template-selection p-3'>
-						<div className='d-flex align-items-center mb-4'>
-							<Button
-								color='link'
+					<div className='template-selection p-3 pt-0'>
+						{/* Header modernizado */}
+						<div
+							className='template-selection-header'
+							style={{
+								display: 'flex',
+								alignItems: 'center',
+								gap: '1.5rem',
+								padding: '1.5rem 0px',
+								paddingTop: '0px',
+							}}>
+							<button
+								type='button'
 								onClick={() => setSelectedTemplate(null)}
-								className='me-3'>
-								<i className='fas fa-arrow-left' /> Voltar
-							</Button>
-							<h5 className='mb-0'>
-								Criar página a partir de: {selectedTemplate.name}
-							</h5>
+								className='back-button'
+								style={{
+									display: 'flex',
+									alignItems: 'center',
+									gap: '0.5rem',
+									padding: '0.75rem 1rem',
+									background: 'white',
+									border: '1px solid #dee2e6',
+									borderRadius: '12px',
+									color: '#495057',
+									fontWeight: '600',
+									transition: 'all 0.3s ease',
+									textDecoration: 'none',
+									cursor: 'pointer',
+									boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+									fontSize: '0.9rem',
+								}}
+								onMouseEnter={(e) => {
+									e.currentTarget.style.background = '#667eea';
+									e.currentTarget.style.color = 'white';
+									e.currentTarget.style.borderColor = '#667eea';
+									e.currentTarget.style.transform = 'translateX(-2px)';
+									e.currentTarget.style.boxShadow =
+										'0 4px 16px rgba(102, 126, 234, 0.3)';
+								}}
+								onMouseLeave={(e) => {
+									e.currentTarget.style.background = 'white';
+									e.currentTarget.style.color = '#495057';
+									e.currentTarget.style.borderColor = '#dee2e6';
+									e.currentTarget.style.transform = 'translateX(0)';
+									e.currentTarget.style.boxShadow =
+										'0 2px 8px rgba(0, 0, 0, 0.05)';
+								}}>
+								<i className='fas fa-arrow-left' style={{ fontSize: '0.9rem' }} />
+								<span>Voltar</span>
+							</button>
+							<div
+								className='template-selection-title'
+								style={{
+									flex: 1,
+								}}>
+								<h4
+									style={{
+										color: '#6c757d',
+										fontSize: '0.9rem',
+										fontWeight: '500',
+										margin: '0 0 0.25rem 0',
+										textTransform: 'uppercase',
+										letterSpacing: '0.5px',
+									}}>
+									Template Selecionado
+								</h4>
+								<h3
+									style={{
+										color: '#2d3748',
+										fontSize: '1.5rem',
+										fontWeight: '700',
+										margin: '0',
+										lineHeight: '1.2',
+									}}>
+									{selectedTemplate.name}
+								</h3>
+							</div>
 						</div>
 
+						{/* Preview da imagem */}
 						{selectedTemplate.thumbnail && (
-							<div className='mb-4'>
+							<div className='template-selection-preview'>
 								<div className='selected-template-preview'>
-									<div className='selected-template-image-container'>
-										<img
-											src={selectedTemplate.thumbnail}
-											alt={selectedTemplate.name}
-											className='selected-template-thumbnail'
-										/>
+									<div
+										className='selected-template-image-container'
+										style={{
+											position: 'relative',
+											width: '100%',
+											height: '400px',
+											overflow: 'hidden',
+											borderRadius: '20px',
+											backgroundColor: '#667eea',
+											boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+											display: 'block',
+										}}
+										onMouseEnter={(e) => {
+											const img = e.currentTarget.querySelector('img');
+											if (img) {
+												img.style.transform =
+													'translateY(calc(-100% + 400px))';
+											}
+										}}
+										onMouseLeave={(e) => {
+											const img = e.currentTarget.querySelector('img');
+											if (img) {
+												img.style.transform = 'translateY(0)';
+											}
+										}}>
+										<div
+											className='image-wrapper'
+											style={{
+												position: 'relative',
+												width: '100%',
+												height: '100%',
+												overflow: 'hidden',
+												display: 'block',
+											}}>
+											<img
+												src={selectedTemplate.thumbnail}
+												alt={selectedTemplate.name}
+												className='selected-template-thumbnail'
+												style={{
+													position: 'absolute',
+													top: 0,
+													left: 0,
+													width: '100%',
+													height: 'auto',
+													minHeight: '100%',
+													objectFit: 'cover',
+													objectPosition: 'top',
+													transition: 'transform 5s ease-in-out',
+													cursor: 'pointer',
+													display: 'block',
+												}}
+											/>
+										</div>
 									</div>
 								</div>
 							</div>
 						)}
 
-						<div className='mb-3'>
-							<label htmlFor='page-name' className='form-label'>
-								Nome da página
-							</label>
-							<Input
-								id='page-name'
-								type='text'
-								placeholder='Digite o nome da página'
-								value={pageName}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-									setPageName(e.target.value)
-								}
-							/>
-						</div>
+						{/* Conteúdo (descrição e formulário) */}
+						<div
+							className='template-selection-content'
+							style={{
+								padding: '2rem 0px',
+							}}>
+							<div
+								className='template-description-section'
+								style={{
+									marginBottom: '2rem',
+								}}>
+								<h5
+									style={{
+										color: '#2d3748',
+										fontSize: '1.1rem',
+										fontWeight: '700',
+										marginBottom: '1rem',
+										display: 'flex',
+										alignItems: 'center',
+										gap: '0.5rem',
+									}}>
+									<span style={{ fontSize: '1.2rem' }}>📋</span>
+									Descrição do Template
+								</h5>
+								<p
+									style={{
+										color: '#4a5568',
+										fontSize: '1rem',
+										lineHeight: '1.6',
+										margin: '0',
+										padding: '1.5rem',
+										background: 'white',
+										borderRadius: '12px',
+										borderLeft: '4px solid #667eea',
+										boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+										transition: 'all 0.3s ease',
+									}}
+									onMouseEnter={(e) => {
+										e.currentTarget.style.boxShadow =
+											'0 4px 16px rgba(0, 0, 0, 0.1)';
+										e.currentTarget.style.transform = 'translateY(-2px)';
+									}}
+									onMouseLeave={(e) => {
+										e.currentTarget.style.boxShadow =
+											'0 2px 8px rgba(0, 0, 0, 0.05)';
+										e.currentTarget.style.transform = 'translateY(0)';
+									}}>
+									{selectedTemplate.description}
+								</p>
+							</div>
 
-						<div className='alert alert-info'>
-							<p className='mb-0'>
-								<strong>Descrição:</strong> {selectedTemplate.description}
-							</p>
+							<div className='template-form-section'>
+								<label
+									htmlFor='page-name'
+									className='form-label'
+									style={{
+										color: '#2d3748',
+										fontWeight: '600',
+										fontSize: '1rem',
+										marginBottom: '0.75rem',
+										display: 'block',
+									}}>
+									Nome da página
+								</label>
+								<Input
+									id='page-name'
+									type='text'
+									value={pageName}
+									placeholder='Digite o nome da página'
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+										setPageName(e.target.value)
+									}
+									style={{
+										borderRadius: '12px',
+										border: '2px solid #e2e8f0',
+										padding: '0.75rem 1rem',
+										fontSize: '1rem',
+										transition: 'all 0.3s ease',
+										width: '100%',
+									}}
+									onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+										e.target.style.borderColor = '#667eea';
+										e.target.style.boxShadow =
+											'0 0 0 3px rgba(102, 126, 234, 0.1)';
+										e.target.style.outline = 'none';
+									}}
+									onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+										e.target.style.borderColor = '#e2e8f0';
+										e.target.style.boxShadow = 'none';
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 				)}

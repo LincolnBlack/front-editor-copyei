@@ -107,6 +107,7 @@
 
   .template-selection {
     padding: 0;
+    animation: fadeInUp 0.5s ease-out;
     
     // Header modernizado
     .template-selection-header {
@@ -129,12 +130,19 @@
         font-weight: 600;
         transition: all 0.3s ease;
         text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         
         &:hover {
           background: #667eea;
           color: white;
           border-color: #667eea;
           transform: translateX(-2px);
+          box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        &:active {
+          transform: translateX(-1px);
         }
         
         i {
@@ -168,6 +176,8 @@
     .template-selection-preview {
       padding: 2rem;
       background: white;
+      max-width: 100%;
+      overflow: hidden;
       
       .selected-template-preview {
         border-radius: 20px;
@@ -175,18 +185,49 @@
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
         background: white;
         max-width: 100%;
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          z-index: 1;
+        }
+        
+        &:hover::before {
+          opacity: 0.1;
+        }
       }
 
       .selected-template-image-container {
         position: relative;
         width: 100%;
-        height: 500px;
+        height: 400px;
         overflow: hidden;
         border-radius: 20px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        display: block;
+      }
+      
+      .image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: block;
       }
 
       .selected-template-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: auto;
         min-height: 100%;
@@ -194,10 +235,25 @@
         object-position: top;
         transition: transform 1.5s ease-in-out;
         cursor: pointer;
+        display: block;
       }
 
       .selected-template-image-container:hover .selected-template-thumbnail {
-        transform: translateY(calc(-100% + 500px));
+        transform: translateY(calc(-100% + 400px));
+      }
+      
+      // Força a imagem a respeitar o container
+      .selected-template-image-container .image-wrapper img {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100% !important;
+        max-width: none !important;
+        object-fit: cover !important;
+        object-position: top !important;
+        display: block !important;
       }
     }
     
@@ -208,6 +264,7 @@
       
       .template-description-section {
         margin-bottom: 2rem;
+        animation: slideIn 0.6s ease-out 0.2s both;
         
         h5 {
           color: #2d3748;
@@ -234,16 +291,38 @@
           border-radius: 12px;
           border-left: 4px solid #667eea;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          transition: all 0.3s ease;
+          
+          &:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+          }
         }
       }
       
       .template-form-section {
+        animation: slideIn 0.6s ease-out 0.4s both;
+        
         .form-label {
           color: #2d3748;
           font-weight: 600;
           font-size: 1rem;
           margin-bottom: 0.75rem;
           display: block;
+        }
+        
+        .form-control {
+          border-radius: 12px;
+          border: 2px solid #e2e8f0;
+          padding: 0.75rem 1rem;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          
+          &:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+          }
         }
       }
     }
@@ -290,7 +369,7 @@
         padding: 1rem;
         
         .selected-template-image-container {
-          height: 300px;
+          height: 250px;
         }
       }
       
@@ -354,7 +433,7 @@
       padding: 0.75rem;
       
       .selected-template-image-container {
-        height: 250px;
+        height: 200px;
       }
     }
     
