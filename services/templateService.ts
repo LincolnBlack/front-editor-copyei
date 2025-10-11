@@ -87,6 +87,16 @@ export interface DeployTemplateData {
 	domainId2: number | null;
 }
 
+export interface CloneTemplateData {
+	title: string;
+	url: string;
+}
+
+export interface GenerateTemplateData {
+	title: string;
+	prompt: string;
+}
+
 class TemplateService {
 	async getTemplates(): Promise<UserTemplate[]> {
 		try {
@@ -116,7 +126,7 @@ class TemplateService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const response = await api.get<{ data: UserTemplate }>(`/templates/user/${id}`);
+			const response = await api.get<{ data: UserTemplate }>(`/templates/${id}`);
 			return response.data.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
@@ -261,6 +271,51 @@ class TemplateService {
 					throw new Error('Token inválido ou expirado');
 				}
 				throw new Error(error.response?.data?.message || 'Erro ao publicar template');
+			}
+			throw error;
+		}
+	}
+
+	async cloneTemplate(cloneData: CloneTemplateData): Promise<UserTemplate> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<{ data: UserTemplate }>('/templates/clone', cloneData);
+			return response.data.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao clonar template');
+			}
+			throw error;
+		}
+	}
+
+	async generateTemplate(generateData: GenerateTemplateData): Promise<UserTemplate> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<{
+				data: {
+					message: string;
+					template: UserTemplate;
+				};
+			}>('/templates/generate', generateData);
+			return response.data.data.template;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao gerar template');
 			}
 			throw error;
 		}

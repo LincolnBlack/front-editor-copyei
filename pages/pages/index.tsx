@@ -19,16 +19,9 @@ import PaginationButtons, { PER_COUNT } from '../../components/PaginationButtons
 import templateService, { UserTemplate, DeployTemplateData } from '../../services/templateService';
 import domainService, { Domain } from '../../services/domainService';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
-
-interface NewPageOption {
-	id: string;
-	title: string;
-	description: string;
-	icon: string;
-	color: string;
-	borderColor: string;
-	onClick: () => void;
-}
+import NewPageModal from '../../components/NewPageModal';
+import ClonePageModal from '../../components/ClonePageModal';
+import AIGenerateModal from '../../components/AIGenerateModal';
 
 const Pages: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
@@ -40,6 +33,8 @@ const Pages: NextPage = () => {
 	const [templateToDelete, setTemplateToDelete] = useState<UserTemplate | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [newPageModalStatus, setNewPageModalStatus] = useState<boolean>(false);
+	const [cloneModalStatus, setCloneModalStatus] = useState<boolean>(false);
+	const [aiGenerateModalStatus, setAiGenerateModalStatus] = useState<boolean>(false);
 
 	// Estados para modal de publicação
 	const [publishModalStatus, setPublishModalStatus] = useState<boolean>(false);
@@ -107,76 +102,51 @@ const Pages: NextPage = () => {
 		setNewPageModalStatus(false);
 	};
 
-	// Lista de opções para criação de nova página
-	const newPageOptions: NewPageOption[] = [
-		{
-			id: 'copy',
-			title: 'Copiar uma página',
-			description: 'Gostou de uma página na web? copie e use como base para sua nova página',
-			icon: 'ContentCopy',
-			color: 'text-success',
-			borderColor: 'border-success',
-			onClick: () => {
-				// TODO: Implementar ação para copiar página
-				console.log('Copiar página');
-				handleCloseNewPageModal();
-			},
-		},
-		{
-			id: 'ai-generate',
-			title: 'Gerar uma nova página IA',
-			description:
-				'Use a inteligência artificial da copyei para criar uma página personalizada para você',
-			icon: 'AutoAwesome',
-			color: 'text-primary',
-			borderColor: 'border-primary',
-			onClick: () => {
-				// TODO: Implementar ação para gerar página com IA
-				console.log('Gerar página com IA');
-				handleCloseNewPageModal();
-			},
-		},
-		{
-			id: 'template',
-			title: 'Criar a partir de um template pronto',
-			description:
-				'Escolha entre vários templates que já foram testados e aprovados e faça a sua customização',
-			icon: 'FolderMatch',
-			color: 'text-info',
-			borderColor: 'border-info',
-			onClick: () => {
+	const handleOpenCloneModal = () => {
+		setCloneModalStatus(true);
+		setNewPageModalStatus(false);
+	};
+
+	const handleCloseCloneModal = () => {
+		setCloneModalStatus(false);
+	};
+
+	const handleOpenAiGenerateModal = () => {
+		setAiGenerateModalStatus(true);
+		setNewPageModalStatus(false);
+	};
+
+	const handleCloseAiGenerateModal = () => {
+		setAiGenerateModalStatus(false);
+	};
+
+	const handleSelectNewPageOption = (optionId: string) => {
+		switch (optionId) {
+			case 'copy':
+				handleOpenCloneModal();
+				break;
+			case 'ai-generate':
+				handleOpenAiGenerateModal();
+				break;
+			case 'template':
 				// TODO: Implementar ação para criar a partir de template
 				console.log('Criar a partir de template');
-				handleCloseNewPageModal();
-			},
-		},
-		{
-			id: 'import-html',
-			title: 'Importar uma página HTML',
-			description: 'Tem uma página HTML? importe e use como base para sua nova página',
-			icon: 'UploadFile',
-			color: 'text-secondary',
-			borderColor: 'border-secondary',
-			onClick: () => {
+				setNewPageModalStatus(false);
+				break;
+			case 'import-html':
 				// TODO: Implementar ação para importar HTML
 				console.log('Importar página HTML');
-				handleCloseNewPageModal();
-			},
-		},
-		{
-			id: 'blank',
-			title: 'Criar uma página em branco',
-			description: 'Crie uma página em branco para você começar do zero',
-			icon: 'AddBox',
-			color: 'text-warning',
-			borderColor: 'border-warning',
-			onClick: () => {
+				setNewPageModalStatus(false);
+				break;
+			case 'blank':
 				// TODO: Implementar ação para criar página em branco
 				console.log('Criar página em branco');
-				handleCloseNewPageModal();
-			},
-		},
-	];
+				setNewPageModalStatus(false);
+				break;
+			default:
+				setNewPageModalStatus(false);
+		}
+	};
 
 	const handleDeleteTemplate = async () => {
 		if (!templateToDelete) return;
@@ -646,45 +616,11 @@ const Pages: NextPage = () => {
 			</Modal>
 
 			{/* Modal de criação de nova página */}
-			<Modal
+			<NewPageModal
 				isOpen={newPageModalStatus}
-				setIsOpen={handleCloseNewPageModal}
-				size='lg'
-				titleId='new-page-modal'>
-				<ModalHeader>
-					<h5 className='modal-title'>Criar nova página</h5>
-				</ModalHeader>
-				<ModalBody>
-					<div className='row g-3'>
-						{newPageOptions.map((option) => (
-							<div key={option.id} className='col-md-6'>
-								<Card
-									className={`h-100 cursor-pointer border-2 border-dashed ${option.borderColor}`}
-									onClick={option.onClick}>
-									<CardBody className='d-flex flex-column align-items-center text-center p-4'>
-										<div className='mb-3'>
-											<Icon
-												icon={option.icon}
-												size='3x'
-												className={option.color}
-											/>
-										</div>
-										<h6 className='fw-bold mb-2'>{option.title}</h6>
-										<p className='text-muted mb-0 small'>
-											{option.description}
-										</p>
-									</CardBody>
-								</Card>
-							</div>
-						))}
-					</div>
-				</ModalBody>
-				<ModalFooter>
-					<Button color='link' onClick={handleCloseNewPageModal}>
-						Cancelar
-					</Button>
-				</ModalFooter>
-			</Modal>
+				onClose={handleCloseNewPageModal}
+				onSelectOption={handleSelectNewPageOption}
+			/>
 
 			{/* Modal de publicação */}
 			<Modal
@@ -781,6 +717,20 @@ const Pages: NextPage = () => {
 					</Button>
 				</ModalFooter>
 			</Modal>
+
+			{/* Modal de clonagem de página */}
+			<ClonePageModal
+				isOpen={cloneModalStatus}
+				onClose={handleCloseCloneModal}
+				onSuccess={fetchTemplates}
+			/>
+
+			{/* Modal de geração com IA */}
+			<AIGenerateModal
+				isOpen={aiGenerateModalStatus}
+				onClose={handleCloseAiGenerateModal}
+				onSuccess={fetchTemplates}
+			/>
 		</PageWrapper>
 	);
 };
