@@ -529,24 +529,22 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
 			</ModalHeader>
 			<ModalBody>
 				{!selectedTemplate ? (
-					<div className='row g-3 p-3'>
+					<div className='template-grid'>
 						{templates.map((template) => (
-							<div key={template.id} className='col-md-6'>
+							<div key={template.id} className='template-item'>
 								<Card
 									className='template-card h-100 cursor-pointer'
 									onClick={() => handleTemplateSelect(template)}>
 									<CardBody className='p-0'>
 										{template.thumbnail ? (
 											<div className='template-preview'>
-												<img
-													src={template.thumbnail}
-													alt={template.name}
-													className='template-thumbnail'
-													style={{
-														height: '200px',
-														objectFit: 'cover',
-													}}
-												/>
+												<div className='template-image-container'>
+													<img
+														src={template.thumbnail}
+														alt={template.name}
+														className='template-thumbnail'
+													/>
+												</div>
 											</div>
 										) : (
 											<div className='template-placeholder'>
@@ -554,9 +552,15 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
 												<p>Sem preview disponível</p>
 											</div>
 										)}
-										<div className='template-info'>
-											<h6>{template.name}</h6>
-											<p>{template.description}</p>
+										<div className='template-info p-3'>
+											<h6 className='template-title'>{template.name}</h6>
+											<p className='template-description'>
+												{template.description}
+											</p>
+											<div className='template-badge'>
+												<i className='fas fa-star' />
+												<span>Premium</span>
+											</div>
 										</div>
 									</CardBody>
 								</Card>
@@ -580,15 +584,13 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
 						{selectedTemplate.thumbnail && (
 							<div className='mb-4'>
 								<div className='selected-template-preview'>
-									<img
-										src={selectedTemplate.thumbnail}
-										alt={selectedTemplate.name}
-										className='w-100'
-										style={{
-											height: '300px',
-											objectFit: 'cover',
-										}}
-									/>
+									<div className='selected-template-image-container'>
+										<img
+											src={selectedTemplate.thumbnail}
+											alt={selectedTemplate.name}
+											className='selected-template-thumbnail'
+										/>
+									</div>
 								</div>
 							</div>
 						)}
