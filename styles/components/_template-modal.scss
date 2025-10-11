@@ -553,3 +553,351 @@
     transform: translateX(100%) translateY(100%) rotate(45deg);
   }
 }
+
+// Estilos para o modal de página em branco
+.blank-page-content {
+  animation: fadeInUp 0.5s ease-out;
+  
+  .blank-page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+    animation: slideIn 0.6s ease-out 0.1s both;
+    
+    .blank-page-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+    }
+    
+    .blank-page-title {
+      flex: 1;
+      
+      h4 {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0 0 0.25rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      h3 {
+        color: #2d3748;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+      }
+    }
+  }
+  
+  .blank-page-preview {
+    margin-bottom: 2rem;
+    animation: slideIn 0.6s ease-out 0.2s both;
+    
+    .preview-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: white;
+      border-radius: 16px;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        border-color: #667eea;
+      }
+      
+      // Simulação de uma página em branco
+      > div {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        position: relative;
+        
+        // Ícone de página em branco
+        > div:first-child {
+          width: 80px;
+          height: 80px;
+          border-radius: 12px;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #6c757d;
+          font-size: 2rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: scale(1.1);
+            color: #667eea;
+          }
+        }
+        
+        // Texto da página
+        > div:nth-child(2) {
+          text-align: center;
+          color: #6c757d;
+          
+          h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: #495057;
+            transition: color 0.3s ease;
+          }
+          
+          p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.8;
+          }
+        }
+        
+        // Linhas decorativas simulando conteúdo
+        > div:last-child {
+          width: 80%;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          
+          > div {
+            height: 4px;
+            border-radius: 2px;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            
+            &:nth-child(1) {
+              background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 50%, #e2e8f0 100%);
+            }
+            
+            &:nth-child(2) {
+              background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 30%, #e2e8f0 100%);
+              width: 60%;
+              opacity: 0.4;
+            }
+            
+            &:nth-child(3) {
+              background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 70%, #e2e8f0 100%);
+              width: 40%;
+              opacity: 0.3;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .blank-page-description {
+    margin-bottom: 2rem;
+    animation: slideIn 0.6s ease-out 0.3s both;
+    
+    h5 {
+      color: #2d3748;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      &::before {
+        content: '📝';
+        font-size: 1.2rem;
+      }
+    }
+    
+    p {
+      color: #4a5568;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+    }
+  }
+  
+  .blank-page-form {
+    animation: slideIn 0.6s ease-out 0.4s both;
+    
+    .form-label {
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    
+    .form-control {
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      
+      &:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+      }
+    }
+  }
+}
+
+// Responsividade para o modal de página em branco
+@media (max-width: 768px) {
+  .blank-page-content {
+    .blank-page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      
+      .blank-page-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+      
+      .blank-page-title {
+        h3 {
+          font-size: 1.25rem;
+        }
+      }
+    }
+    
+    .blank-page-preview {
+      .preview-container {
+        height: 250px;
+        
+        > div {
+          > div:first-child {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+          }
+          
+          > div:nth-child(2) {
+            h1 {
+              font-size: 1.25rem;
+            }
+            
+            p {
+              font-size: 0.8rem;
+            }
+          }
+        }
+      }
+    }
+    
+    .blank-page-description {
+      h5 {
+        font-size: 1rem;
+      }
+      
+      p {
+        padding: 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .blank-page-content {
+    .blank-page-header {
+      padding: 0.75rem 0;
+      
+      .blank-page-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+      }
+      
+      .blank-page-title {
+        h4 {
+          font-size: 0.8rem;
+        }
+        
+        h3 {
+          font-size: 1.1rem;
+        }
+      }
+    }
+    
+    .blank-page-preview {
+      .preview-container {
+        height: 200px;
+        
+        > div {
+          > div:first-child {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+          }
+          
+          > div:nth-child(2) {
+            h1 {
+              font-size: 1.1rem;
+            }
+            
+            p {
+              font-size: 0.75rem;
+            }
+          }
+        }
+      }
+    }
+    
+    .blank-page-description {
+      h5 {
+        font-size: 0.95rem;
+      }
+      
+      p {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

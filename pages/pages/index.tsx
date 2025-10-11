@@ -24,6 +24,7 @@ import ClonePageModal from '../../components/ClonePageModal';
 import AIGenerateModal from '../../components/AIGenerateModal';
 import UploadHtmlModal from '../../components/UploadHtmlModal';
 import TemplateModal from '../../components/TemplateModal';
+import BlankPageModal from '../../components/BlankPageModal';
 
 const Pages: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
@@ -39,6 +40,7 @@ const Pages: NextPage = () => {
 	const [aiGenerateModalStatus, setAiGenerateModalStatus] = useState<boolean>(false);
 	const [uploadHtmlModalStatus, setUploadHtmlModalStatus] = useState<boolean>(false);
 	const [templateModalStatus, setTemplateModalStatus] = useState<boolean>(false);
+	const [blankPageModalStatus, setBlankPageModalStatus] = useState<boolean>(false);
 
 	// Estados para modal de publicação
 	const [publishModalStatus, setPublishModalStatus] = useState<boolean>(false);
@@ -142,6 +144,61 @@ const Pages: NextPage = () => {
 		setTemplateModalStatus(false);
 	};
 
+	const handleOpenBlankPageModal = () => {
+		setBlankPageModalStatus(true);
+		setNewPageModalStatus(false);
+	};
+
+	const handleCloseBlankPageModal = () => {
+		setBlankPageModalStatus(false);
+	};
+
+	const handleCreateBlankPage = async (pageName: string) => {
+		try {
+			// HTML da página em branco
+			const blankPageHtml = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página em branco</title>
+</head>
+<body>
+    <h1>Página em branco</h1>
+</body>
+</html>`;
+
+			// 1. Criar o template no backend
+			const templateData = {
+				title: pageName,
+				visibility: false,
+				typeCreation: 'DRAG_AND_DROP',
+				type: 'DRAG_AND_DROP',
+				objectFolder: 'templates',
+			};
+
+			const createdTemplate = await templateService.createFromTemplate(templateData);
+
+			// 2. Obter URL pré-assinada para upload
+			const presignedUrl = await templateService.getPresignedUrlForUpload(
+				createdTemplate.id.toString(),
+			);
+
+			// 3. Fazer upload do HTML para S3
+			await templateService.uploadHtmlToS3(presignedUrl, blankPageHtml);
+
+			// 4. Recarregar a lista de templates
+			await fetchTemplates();
+
+			// 5. Fechar modal e mostrar sucesso
+			setBlankPageModalStatus(false);
+			alert('Página em branco criada com sucesso!');
+		} catch (error) {
+			console.error('Erro ao criar página em branco:', error);
+			alert('Erro ao criar página. Tente novamente.');
+		}
+	};
+
 	const handleSelectTemplate = async (template: any, pageName: string) => {
 		try {
 			// 1. Criar o template no backend
@@ -190,9 +247,7 @@ const Pages: NextPage = () => {
 				handleOpenUploadHtmlModal();
 				break;
 			case 'blank':
-				// TODO: Implementar ação para criar página em branco
-				console.log('Criar página em branco');
-				setNewPageModalStatus(false);
+				handleOpenBlankPageModal();
 				break;
 			default:
 				setNewPageModalStatus(false);
@@ -795,6 +850,13 @@ const Pages: NextPage = () => {
 				isOpen={templateModalStatus}
 				onClose={handleCloseTemplateModal}
 				onSelectTemplate={handleSelectTemplate}
+			/>
+
+			{/* Modal de criação de página em branco */}
+			<BlankPageModal
+				isOpen={blankPageModalStatus}
+				onClose={handleCloseBlankPageModal}
+				onCreatePage={handleCreateBlankPage}
 			/>
 		</PageWrapper>
 	);
