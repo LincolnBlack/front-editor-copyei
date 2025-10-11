@@ -44,8 +44,8 @@ const ProfilePage = () => {
 			const userData = await authService.getMe();
 			setUser(userData);
 			setProfileForm({
-				name: userData.name,
-				email: userData.email,
+				name: userData.data.user.name,
+				email: userData.data.user.email,
 			});
 		} catch (error) {
 			console.error('Erro ao carregar dados do usuário:', error);
@@ -62,8 +62,8 @@ const ProfilePage = () => {
 
 		try {
 			const credentials: UpdateProfileCredentials = {};
-			if (profileForm.name !== user?.name) credentials.name = profileForm.name;
-			if (profileForm.email !== user?.email) credentials.email = profileForm.email;
+			if (profileForm.name !== user?.data.user.name) credentials.name = profileForm.name;
+			if (profileForm.email !== user?.data.user.email) credentials.email = profileForm.email;
 
 			if (Object.keys(credentials).length === 0) {
 				setMessage({ type: 'error', text: 'Nenhuma alteração foi feita' });

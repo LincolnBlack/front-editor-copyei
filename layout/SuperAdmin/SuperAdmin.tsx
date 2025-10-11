@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import { superAdminPagesMenu } from '../../menu';
+import { adminPagesMenu } from '../../menu';
 import Collapse from '../../components/bootstrap/Collapse';
 import Icon from '../../components/icon/Icon';
 import Navigation from '../Navigation/Navigation';
@@ -38,7 +38,7 @@ const SuperAdmin = () => {
 			</div>
 
 			<Collapse isOpen={collapseStatus} className='super-admin-menu'>
-				<Navigation menu={superAdminPagesMenu} id='aside-super-admin' />
+				<Navigation menu={adminPagesMenu} id='aside-super-admin' />
 			</Collapse>
 		</>
 	);
