@@ -285,8 +285,42 @@ const Index: NextPage = () => {
 													</td>
 													<td>
 														<div className='fs-6'>
-															{website.subdomain}.
-															{website.Domain.domain}
+															{(() => {
+																// Verificar se foi criado há mais de 4 minutos
+																const fourMinutesAgo = new Date(
+																	Date.now() - 4 * 60 * 1000,
+																);
+																const websiteCreatedAt = new Date(
+																	website.created_at,
+																);
+																const isOlderThan4Minutes =
+																	websiteCreatedAt <
+																	fourMinutesAgo;
+
+																// Só torna clicável se foi criado há mais de 4 minutos
+																if (
+																	isOlderThan4Minutes &&
+																	website.cloudfront_distribution_domain
+																) {
+																	return (
+																		<a
+																			href={`https://${website.subdomain}.${website.Domain.domain}`}
+																			target='_blank'
+																			rel='noopener noreferrer'
+																			className='text-decoration-none'>
+																			{website.subdomain}.
+																			{website.Domain.domain}
+																		</a>
+																	);
+																} else {
+																	return (
+																		<span>
+																			{website.subdomain}.
+																			{website.Domain.domain}
+																		</span>
+																	);
+																}
+															})()}
 														</div>
 													</td>
 													<td>
