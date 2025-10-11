@@ -105,6 +105,20 @@ export interface UploadTemplateData {
 	typeCreation: string;
 }
 
+export interface CreateFromTemplateData {
+	title: string;
+	visibility: boolean;
+	typeCreation: string;
+	type: string;
+	objectFolder: string;
+}
+
+export interface PresignedUrlForUploadResponse {
+	data: {
+		presignUrl: string;
+	};
+}
+
 class TemplateService {
 	async getTemplates(): Promise<UserTemplate[]> {
 		try {
@@ -367,6 +381,77 @@ class TemplateService {
 				);
 			}
 			throw error;
+		}
+	}
+
+	async createFromTemplate(templateData: CreateFromTemplateData): Promise<UserTemplate> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<{ data: UserTemplate }>(
+				'/templates',
+				templateData,
+			);
+			return response.data.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(
+					error.response?.data?.message || 'Erro ao criar template',
+				);
+			}
+			throw error;
+		}
+	}
+
+	async getPresignedUrlForUpload(templateId: string): Promise<string> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<PresignedUrlForUploadResponse>(
+				`/templates/${templateId}/presign-urls`,
+				{
+					filePath: 'index.html',
+					type: 'put',
+				},
+			);
+			return response.data.data.presignUrl;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(
+					error.response?.data?.message || 'Erro ao obter URL para upload',
+				);
+			}
+			throw error;
+		}
+	}
+
+	async uploadHtmlToS3(presignedUrl: string, htmlContent: string): Promise<void> {
+		try {
+			// Converter HTML para Blob
+			const blob = new Blob([htmlContent], { type: 'text/html' });
+			
+			// Fazer upload para S3 usando a URL pré-assinada
+			await fetch(presignedUrl, {
+				method: 'PUT',
+				body: blob,
+				headers: {
+					'Content-Type': 'text/html',
+				},
+			});
+		} catch (error) {
+			throw new Error('Erro ao fazer upload do HTML para S3');
 		}
 	}
 }

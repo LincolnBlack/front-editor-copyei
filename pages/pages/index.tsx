@@ -23,6 +23,7 @@ import NewPageModal from '../../components/NewPageModal';
 import ClonePageModal from '../../components/ClonePageModal';
 import AIGenerateModal from '../../components/AIGenerateModal';
 import UploadHtmlModal from '../../components/UploadHtmlModal';
+import TemplateModal from '../../components/TemplateModal';
 
 const Pages: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
@@ -37,6 +38,7 @@ const Pages: NextPage = () => {
 	const [cloneModalStatus, setCloneModalStatus] = useState<boolean>(false);
 	const [aiGenerateModalStatus, setAiGenerateModalStatus] = useState<boolean>(false);
 	const [uploadHtmlModalStatus, setUploadHtmlModalStatus] = useState<boolean>(false);
+	const [templateModalStatus, setTemplateModalStatus] = useState<boolean>(false);
 
 	// Estados para modal de publicação
 	const [publishModalStatus, setPublishModalStatus] = useState<boolean>(false);
@@ -131,6 +133,48 @@ const Pages: NextPage = () => {
 		setUploadHtmlModalStatus(false);
 	};
 
+	const handleOpenTemplateModal = () => {
+		setTemplateModalStatus(true);
+		setNewPageModalStatus(false);
+	};
+
+	const handleCloseTemplateModal = () => {
+		setTemplateModalStatus(false);
+	};
+
+	const handleSelectTemplate = async (template: any, pageName: string) => {
+		try {
+			// 1. Criar o template no backend
+			const templateData = {
+				title: pageName,
+				visibility: false,
+				typeCreation: 'DRAG_AND_DROP',
+				type: 'DRAG_AND_DROP',
+				objectFolder: 'templates',
+			};
+
+			const createdTemplate = await templateService.createFromTemplate(templateData);
+
+			// 2. Obter URL pré-assinada para upload
+			const presignedUrl = await templateService.getPresignedUrlForUpload(
+				createdTemplate.id.toString(),
+			);
+
+			// 3. Fazer upload do HTML para S3
+			await templateService.uploadHtmlToS3(presignedUrl, template.html);
+
+			// 4. Recarregar a lista de templates
+			await fetchTemplates();
+
+			// 5. Fechar modal e mostrar sucesso
+			setTemplateModalStatus(false);
+			alert('Página criada com sucesso!');
+		} catch (error) {
+			console.error('Erro ao criar página a partir de template:', error);
+			alert('Erro ao criar página. Tente novamente.');
+		}
+	};
+
 	const handleSelectNewPageOption = (optionId: string) => {
 		switch (optionId) {
 			case 'copy':
@@ -140,9 +184,7 @@ const Pages: NextPage = () => {
 				handleOpenAiGenerateModal();
 				break;
 			case 'template':
-				// TODO: Implementar ação para criar a partir de template
-				console.log('Criar a partir de template');
-				setNewPageModalStatus(false);
+				handleOpenTemplateModal();
 				break;
 			case 'import-html':
 				handleOpenUploadHtmlModal();
@@ -746,6 +788,13 @@ const Pages: NextPage = () => {
 				isOpen={uploadHtmlModalStatus}
 				onClose={handleCloseUploadHtmlModal}
 				onSuccess={fetchTemplates}
+			/>
+
+			{/* Modal de seleção de template */}
+			<TemplateModal
+				isOpen={templateModalStatus}
+				onClose={handleCloseTemplateModal}
+				onSelectTemplate={handleSelectTemplate}
 			/>
 		</PageWrapper>
 	);
