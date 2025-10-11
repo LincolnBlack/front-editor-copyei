@@ -14,7 +14,10 @@ const headers = [
 	{ path: authPages.passwordRecovery.path, element: null },
 	{ path: demoPagesMenu.page404.path, element: null },
 	{ path: dashboardPagesMenu.pages.path, element: <DefaultHeader title='Páginas' /> },
-	{ path: dashboardPagesMenu.dashboard.path, element: <DefaultHeader /> },
+	{
+		path: dashboardPagesMenu.dashboard.path,
+		element: <DefaultHeader title='Páginas publicadas' />,
+	},
 	{
 		path: `/*`,
 		element: <DefaultHeader />,

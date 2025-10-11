@@ -34,6 +34,11 @@ const Index: NextPage = () => {
 	const [websiteToDelete, setWebsiteToDelete] = useState<WebsiteTemplate | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+	// Estados para modal de configuração do domínio
+	const [domainConfigModalStatus, setDomainConfigModalStatus] = useState<boolean>(false);
+	const [websiteToConfigure, setWebsiteToConfigure] = useState<WebsiteTemplate | null>(null);
+	const [copiedField, setCopiedField] = useState<string | null>(null);
+
 	// Estados para paginação
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [perPage, setPerPage] = useState<number>(PER_COUNT['10']);
@@ -112,13 +117,44 @@ const Index: NextPage = () => {
 		setDeleteLoading(false);
 	};
 
+	// Funções para controlar modal de configuração do domínio
+	const handleCloseDomainConfigModal = () => {
+		setDomainConfigModalStatus(false);
+		setWebsiteToConfigure(null);
+		setCopiedField(null);
+	};
+
+	// Função para copiar texto para o clipboard
+	const handleCopyToClipboard = async (text: string, fieldName: string) => {
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopiedField(fieldName);
+			// Limpar o feedback após 2 segundos
+			setTimeout(() => {
+				setCopiedField(null);
+			}, 2000);
+		} catch (error) {
+			console.error('Erro ao copiar para clipboard:', error);
+			// Fallback para navegadores mais antigos
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			document.body.appendChild(textArea);
+			textArea.select();
+			document.execCommand('copy');
+			document.body.removeChild(textArea);
+			setCopiedField(fieldName);
+			setTimeout(() => {
+				setCopiedField(null);
+			}, 2000);
+		}
+	};
+
 	const handleDeleteWebsite = async () => {
 		if (!websiteToDelete) return;
 
 		try {
 			setDeleteLoading(true);
-			// TODO: Implementar delete no websiteService
-			// await websiteService.deleteWebsite(websiteToDelete.id.toString());
+			await websiteService.deleteWebsite(websiteToDelete.id.toString());
 			handleCloseDeleteModal();
 			fetchWebsites(); // Recarregar a lista após deletar
 		} catch (error) {
@@ -130,8 +166,8 @@ const Index: NextPage = () => {
 	};
 
 	const handlePublishWebsite = (website: WebsiteTemplate) => {
-		// TODO: Implementar publicação
-		console.log('Publicar website:', website);
+		setWebsiteToConfigure(website);
+		setDomainConfigModalStatus(true);
 	};
 
 	const handleClearFilters = () => {
@@ -351,7 +387,7 @@ const Index: NextPage = () => {
 															onClick={() =>
 																handlePublishWebsite(website)
 															}>
-															<Icon icon='Publish' size='lg' />
+															<Icon icon='CloudUpload' size='lg' />
 														</Button>
 														<Button
 															color='danger'
@@ -383,6 +419,172 @@ const Index: NextPage = () => {
 					</div>
 				</div>
 			</Page>
+
+			{/* Modal de configuração do domínio */}
+			<Modal
+				isOpen={domainConfigModalStatus}
+				setIsOpen={handleCloseDomainConfigModal}
+				size='lg'
+				titleId='domain-config-modal'>
+				<ModalHeader>
+					<h5 className='modal-title'>
+						Ativando domínio {websiteToConfigure?.subdomain}
+					</h5>
+				</ModalHeader>
+				<ModalBody>
+					<div className='domain-config-content'>
+						<div className='mb-4'>
+							<h6 className='fw-bold mb-3 text-primary'>
+								<Icon icon='Settings' className='me-2' />
+								Como configurar:
+							</h6>
+							<div className='steps-container'>
+								<div className='step-item mb-3'>
+									<div className='d-flex align-items-start'>
+										<div className='step-number me-3'>
+											<span className='badge bg-primary rounded-circle'>
+												1
+											</span>
+										</div>
+										<div className='step-content'>
+											<p className='mb-0'>
+												Acesse seu provedor onde realizou a compra do seu
+												domínio
+											</p>
+										</div>
+									</div>
+								</div>
+
+								<div className='step-item mb-3'>
+									<div className='d-flex align-items-start'>
+										<div className='step-number me-3'>
+											<span className='badge bg-primary rounded-circle'>
+												2
+											</span>
+										</div>
+										<div className='step-content'>
+											<p className='mb-2'>
+												Adicione uma TAG "CNAME" apontando para o seguinte
+												endereço:
+											</p>
+											<div className='bg-light p-3 rounded border d-flex align-items-center justify-content-between'>
+												<code className='text-primary fw-bold'>
+													{websiteToConfigure?.subdomain}
+												</code>
+												<Button
+													color='link'
+													size='sm'
+													className='p-1'
+													onClick={() =>
+														handleCopyToClipboard(
+															websiteToConfigure?.subdomain || '',
+															'subdomain',
+														)
+													}>
+													<Icon
+														icon={
+															copiedField === 'subdomain'
+																? 'Check'
+																: 'ContentCopy'
+														}
+														size='sm'
+														className={
+															copiedField === 'subdomain'
+																? 'text-success'
+																: 'text-muted'
+														}
+													/>
+												</Button>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div className='step-item mb-4'>
+									<div className='d-flex align-items-start'>
+										<div className='step-number me-3'>
+											<span className='badge bg-primary rounded-circle'>
+												3
+											</span>
+										</div>
+										<div className='step-content'>
+											<p className='mb-2'>
+												E o VALUE apontando para o seguinte endereço:
+											</p>
+											<div className='bg-light p-3 rounded border d-flex align-items-center justify-content-between'>
+												<code className='text-primary fw-bold'>
+													{
+														websiteToConfigure?.cloudfront_distribution_domain
+													}
+												</code>
+												<Button
+													color='link'
+													size='sm'
+													className='p-1'
+													onClick={() =>
+														handleCopyToClipboard(
+															websiteToConfigure?.cloudfront_distribution_domain ||
+																'',
+															'cloudfront',
+														)
+													}>
+													<Icon
+														icon={
+															copiedField === 'cloudfront'
+																? 'Check'
+																: 'ContentCopy'
+														}
+														size='sm'
+														className={
+															copiedField === 'cloudfront'
+																? 'text-success'
+																: 'text-muted'
+														}
+													/>
+												</Button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<p
+							style={{
+								color: '#4a5568',
+								fontSize: '1rem',
+								lineHeight: '1.6',
+								margin: '0',
+								padding: '1.5rem',
+								background: 'white',
+								borderRadius: '12px',
+								borderLeft: '4px solid #667eea',
+								boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+								transition: 'all 0.3s ease',
+							}}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
+								e.currentTarget.style.transform = 'translateY(-2px)';
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+								e.currentTarget.style.transform = 'translateY(0)';
+							}}>
+							<Icon icon='Info' className='me-2' />
+							<strong>Importante:</strong> A propagação pode levar até 24h para ser
+							efetivada.
+						</p>
+					</div>
+				</ModalBody>
+				<ModalFooter>
+					<Button color='link' onClick={handleCloseDomainConfigModal}>
+						Fechar
+					</Button>
+					<Button color='primary' onClick={handleCloseDomainConfigModal} icon='Check'>
+						Entendi
+					</Button>
+				</ModalFooter>
+			</Modal>
 
 			{/* Modal de confirmação de delete */}
 			<Modal

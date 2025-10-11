@@ -89,6 +89,29 @@ class WebsiteService {
 			throw error;
 		}
 	}
+
+	async deleteWebsite(websiteId: string): Promise<void> {
+		try {
+			// Verificar se o usuário está autenticado
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			await api.delete(`/websites/${websiteId}`);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				if (error.response?.status === 404) {
+					throw new Error('Website não encontrado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao deletar website');
+			}
+			throw error;
+		}
+	}
 }
 
 const websiteService = new WebsiteService();
