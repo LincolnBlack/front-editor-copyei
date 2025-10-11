@@ -22,6 +22,7 @@ import { useAdminAuth } from '../../hooks/useAdminAuth';
 import NewPageModal from '../../components/NewPageModal';
 import ClonePageModal from '../../components/ClonePageModal';
 import AIGenerateModal from '../../components/AIGenerateModal';
+import UploadHtmlModal from '../../components/UploadHtmlModal';
 
 const Pages: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
@@ -35,6 +36,7 @@ const Pages: NextPage = () => {
 	const [newPageModalStatus, setNewPageModalStatus] = useState<boolean>(false);
 	const [cloneModalStatus, setCloneModalStatus] = useState<boolean>(false);
 	const [aiGenerateModalStatus, setAiGenerateModalStatus] = useState<boolean>(false);
+	const [uploadHtmlModalStatus, setUploadHtmlModalStatus] = useState<boolean>(false);
 
 	// Estados para modal de publicação
 	const [publishModalStatus, setPublishModalStatus] = useState<boolean>(false);
@@ -120,6 +122,15 @@ const Pages: NextPage = () => {
 		setAiGenerateModalStatus(false);
 	};
 
+	const handleOpenUploadHtmlModal = () => {
+		setUploadHtmlModalStatus(true);
+		setNewPageModalStatus(false);
+	};
+
+	const handleCloseUploadHtmlModal = () => {
+		setUploadHtmlModalStatus(false);
+	};
+
 	const handleSelectNewPageOption = (optionId: string) => {
 		switch (optionId) {
 			case 'copy':
@@ -134,9 +145,7 @@ const Pages: NextPage = () => {
 				setNewPageModalStatus(false);
 				break;
 			case 'import-html':
-				// TODO: Implementar ação para importar HTML
-				console.log('Importar página HTML');
-				setNewPageModalStatus(false);
+				handleOpenUploadHtmlModal();
 				break;
 			case 'blank':
 				// TODO: Implementar ação para criar página em branco
@@ -729,6 +738,13 @@ const Pages: NextPage = () => {
 			<AIGenerateModal
 				isOpen={aiGenerateModalStatus}
 				onClose={handleCloseAiGenerateModal}
+				onSuccess={fetchTemplates}
+			/>
+
+			{/* Modal de upload de HTML */}
+			<UploadHtmlModal
+				isOpen={uploadHtmlModalStatus}
+				onClose={handleCloseUploadHtmlModal}
 				onSuccess={fetchTemplates}
 			/>
 		</PageWrapper>

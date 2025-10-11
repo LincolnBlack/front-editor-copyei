@@ -97,6 +97,14 @@ export interface GenerateTemplateData {
 	prompt: string;
 }
 
+export interface UploadTemplateData {
+	title: string;
+	htmlFile: File;
+	subdomain: string;
+	ownDomain: boolean;
+	typeCreation: string;
+}
+
 class TemplateService {
 	async getTemplates(): Promise<UserTemplate[]> {
 		try {
@@ -316,6 +324,47 @@ class TemplateService {
 					throw new Error('Token inválido ou expirado');
 				}
 				throw new Error(error.response?.data?.message || 'Erro ao gerar template');
+			}
+			throw error;
+		}
+	}
+
+	async uploadTemplate(uploadData: UploadTemplateData): Promise<UserTemplate> {
+		try {
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			// Criar FormData para enviar arquivo
+			const formData = new FormData();
+			formData.append('htmlFile', uploadData.htmlFile);
+			formData.append('title', uploadData.title);
+			formData.append('subdomain', uploadData.subdomain);
+			formData.append('ownDomain', uploadData.ownDomain.toString());
+			formData.append('typeCreation', uploadData.typeCreation);
+
+			// Fazer requisição com FormData
+			const response = await api.post<{ data: UserTemplate }>(
+				'/templates/upload-html',
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+
+			return response.data.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(
+					error.response?.data?.message || 'Erro ao fazer upload do template',
+				);
 			}
 			throw error;
 		}
