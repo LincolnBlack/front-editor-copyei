@@ -14,6 +14,13 @@ export const dashboardPagesMenu = {
 		icon: 'Widgets',
 		subMenu: null,
 	},
+	domains: {
+		id: 'domains',
+		text: 'Domínios',
+		path: 'domains',
+		icon: 'Domain',
+		subMenu: null,
+	},
 };
 
 export const authPages = {

@@ -86,6 +86,72 @@ class DomainService {
 			(domain) => domain.domain !== 'copy-ei.com' && domain.status === 'ISSUED',
 		);
 	}
+
+	// Método para sincronizar domínio
+	async syncDomain(domainId: number): Promise<void> {
+		try {
+			// Verificar se o usuário está autenticado
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			await api.post(`/domains/${domainId}/sync`);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao sincronizar domínio');
+			}
+			throw error;
+		}
+	}
+
+	// Método para criar domínio
+	async createDomain(domainName: string): Promise<Domain> {
+		try {
+			// Verificar se o usuário está autenticado
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			const response = await api.post<{ data: Domain }>('/domains', {
+				domain: domainName,
+			});
+			return response.data.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao criar domínio');
+			}
+			throw error;
+		}
+	}
+
+	// Método para deletar domínio
+	async deleteDomain(domainId: number): Promise<void> {
+		try {
+			// Verificar se o usuário está autenticado
+			const token = localStorage.getItem('jwt_token');
+			if (!token) {
+				throw new Error('Usuário não autenticado');
+			}
+
+			await api.delete(`/domains/${domainId}`);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					throw new Error('Token inválido ou expirado');
+				}
+				throw new Error(error.response?.data?.message || 'Erro ao deletar domínio');
+			}
+			throw error;
+		}
+	}
 }
 
 const domainService = new DomainService();
