@@ -628,41 +628,81 @@ const Pages: NextPage = () => {
 														)}
 													</td>
 													<td>
-														<Button
-															color='primary'
-															isLight
-															size='sm'
-															className='me-2'
-															onClick={() => handleVisualize(i)}>
-															<Icon icon='Visibility' size='lg' />{' '}
-															Visualizar
-														</Button>
-														<Button
-															color='primary'
-															isLight
-															size='sm'
-															className='me-2'
-															onClick={() => handlePublish(i)}>
-															<Icon icon='Publish' size='lg' />{' '}
-															Publicar
-														</Button>
-														<Button
-															color='primary'
-															isLight
-															size='sm'
-															className='me-2'
-															onClick={() => handleEdit(i)}>
-															<Icon icon='Edit' size='lg' />
-														</Button>
-														<Button
-															color='danger'
-															isLight
-															size='sm'
-															onClick={() =>
-																handleOpenDeleteModal(i)
-															}>
-															<Icon icon='Delete' size='lg' />
-														</Button>
+														{/* Verificar se é página gerada por IA e está em status DRAFT */}
+														{i.type_creation === 'GENERATED' &&
+														i.status === 'DRAFT' ? (
+															<div className='d-flex align-items-center'>
+																<div
+																	className='spinner-border spinner-border-sm text-primary me-2'
+																	role='status'>
+																	<span className='visually-hidden'>
+																		Gerando...
+																	</span>
+																</div>
+																<span className='text-muted me-3'>
+																	Gerando página...
+																</span>
+																<Button
+																	color='info'
+																	isLight
+																	size='sm'
+																	onClick={fetchTemplates}>
+																	<Icon
+																		icon='Refresh'
+																		size='lg'
+																	/>{' '}
+																	Atualizar
+																</Button>
+															</div>
+														) : (
+															<>
+																<Button
+																	color='primary'
+																	isLight
+																	size='sm'
+																	className='me-2'
+																	onClick={() =>
+																		handleVisualize(i)
+																	}>
+																	<Icon
+																		icon='Visibility'
+																		size='lg'
+																	/>{' '}
+																	Visualizar
+																</Button>
+																<Button
+																	color='primary'
+																	isLight
+																	size='sm'
+																	className='me-2'
+																	onClick={() =>
+																		handlePublish(i)
+																	}>
+																	<Icon
+																		icon='Publish'
+																		size='lg'
+																	/>{' '}
+																	Publicar
+																</Button>
+																<Button
+																	color='primary'
+																	isLight
+																	size='sm'
+																	className='me-2'
+																	onClick={() => handleEdit(i)}>
+																	<Icon icon='Edit' size='lg' />
+																</Button>
+																<Button
+																	color='danger'
+																	isLight
+																	size='sm'
+																	onClick={() =>
+																		handleOpenDeleteModal(i)
+																	}>
+																	<Icon icon='Delete' size='lg' />
+																</Button>
+															</>
+														)}
 													</td>
 												</tr>
 											))}
