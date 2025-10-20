@@ -154,4 +154,10 @@ export const adminPagesMenu = {
 		path: 'admin/users',
 		icon: 'People',
 	},
+	webhooks: {
+		id: 'webhooks',
+		text: 'Webhooks',
+		path: 'admin/webhooks',
+		icon: 'Webhook',
+	},
 };
