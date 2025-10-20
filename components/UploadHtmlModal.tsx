@@ -174,7 +174,11 @@ const UploadHtmlModal: React.FC<UploadHtmlModalProps> = ({ isOpen, onClose, onSu
 							onClick={isUploading ? undefined : handleClickUpload}>
 							{selectedFile ? (
 								<div>
-									<Icon icon='CheckCircle' size='2x' className='text-success mb-2' />
+									<Icon
+										icon='CheckCircle'
+										size='2x'
+										className='text-success mb-2'
+									/>
 									<p className='mb-2'>
 										<strong>Arquivo selecionado:</strong>
 									</p>
@@ -194,7 +198,11 @@ const UploadHtmlModal: React.FC<UploadHtmlModalProps> = ({ isOpen, onClose, onSu
 								</div>
 							) : (
 								<div>
-									<Icon icon='CloudUpload' size='2x' className='text-muted mb-2' />
+									<Icon
+										icon='CloudUpload'
+										size='2x'
+										className='text-muted mb-2'
+									/>
 									<p className='mb-2'>
 										<strong>Arraste e solte seu arquivo HTML aqui</strong>
 									</p>
@@ -230,10 +238,7 @@ const UploadHtmlModal: React.FC<UploadHtmlModalProps> = ({ isOpen, onClose, onSu
 					isDisable={isUploading || !title.trim() || !selectedFile}>
 					{isUploading ? (
 						<>
-							<span
-								className='spinner-border spinner-border-sm me-2'
-								role='status'
-							/>
+							<span className='spinner-border spinner-border-sm me-2' role='status' />
 							Enviando...
 						</>
 					) : (
