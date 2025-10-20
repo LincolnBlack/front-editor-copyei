@@ -391,19 +391,14 @@ class TemplateService {
 				throw new Error('Usuário não autenticado');
 			}
 
-			const response = await api.post<{ data: UserTemplate }>(
-				'/templates',
-				templateData,
-			);
+			const response = await api.post<{ data: UserTemplate }>('/templates', templateData);
 			return response.data.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 401) {
 					throw new Error('Token inválido ou expirado');
 				}
-				throw new Error(
-					error.response?.data?.message || 'Erro ao criar template',
-				);
+				throw new Error(error.response?.data?.message || 'Erro ao criar template');
 			}
 			throw error;
 		}
@@ -429,9 +424,7 @@ class TemplateService {
 				if (error.response?.status === 401) {
 					throw new Error('Token inválido ou expirado');
 				}
-				throw new Error(
-					error.response?.data?.message || 'Erro ao obter URL para upload',
-				);
+				throw new Error(error.response?.data?.message || 'Erro ao obter URL para upload');
 			}
 			throw error;
 		}
@@ -441,7 +434,7 @@ class TemplateService {
 		try {
 			// Converter HTML para Blob
 			const blob = new Blob([htmlContent], { type: 'text/html' });
-			
+
 			// Fazer upload para S3 usando a URL pré-assinada
 			await fetch(presignedUrl, {
 				method: 'PUT',
