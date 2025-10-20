@@ -148,7 +148,7 @@ const BlankPageModal: React.FC<BlankPageModalProps> = ({ isOpen, onClose, onCrea
 									}}>
 									<i className='fas fa-file-alt' />
 								</div>
-								
+
 								{/* Texto da página */}
 								<div
 									style={{
@@ -185,7 +185,8 @@ const BlankPageModal: React.FC<BlankPageModalProps> = ({ isOpen, onClose, onCrea
 									<div
 										style={{
 											height: '4px',
-											background: 'linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 50%, #e2e8f0 100%)',
+											background:
+												'linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 50%, #e2e8f0 100%)',
 											borderRadius: '2px',
 											opacity: '0.6',
 										}}
@@ -193,7 +194,8 @@ const BlankPageModal: React.FC<BlankPageModalProps> = ({ isOpen, onClose, onCrea
 									<div
 										style={{
 											height: '4px',
-											background: 'linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 30%, #e2e8f0 100%)',
+											background:
+												'linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 30%, #e2e8f0 100%)',
 											borderRadius: '2px',
 											opacity: '0.4',
 											width: '60%',
@@ -202,7 +204,8 @@ const BlankPageModal: React.FC<BlankPageModalProps> = ({ isOpen, onClose, onCrea
 									<div
 										style={{
 											height: '4px',
-											background: 'linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 70%, #e2e8f0 100%)',
+											background:
+												'linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 70%, #e2e8f0 100%)',
 											borderRadius: '2px',
 											opacity: '0.3',
 											width: '40%',
@@ -253,7 +256,10 @@ const BlankPageModal: React.FC<BlankPageModalProps> = ({ isOpen, onClose, onCrea
 								e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
 								e.currentTarget.style.transform = 'translateY(0)';
 							}}>
-							Uma página em branco é perfeita para começar do zero. Você terá total liberdade para criar seu conteúdo personalizado usando nosso editor visual. Ideal para projetos únicos ou quando você quer ter controle total sobre o design.
+							Uma página em branco é perfeita para começar do zero. Você terá total
+							liberdade para criar seu conteúdo personalizado usando nosso editor
+							visual. Ideal para projetos únicos ou quando você quer ter controle
+							total sobre o design.
 						</p>
 					</div>
 
@@ -310,10 +316,7 @@ const BlankPageModal: React.FC<BlankPageModalProps> = ({ isOpen, onClose, onCrea
 					isDisable={isCreating || !pageName.trim()}>
 					{isCreating ? (
 						<>
-							<span
-								className='spinner-border spinner-border-sm me-2'
-								role='status'
-							/>
+							<span className='spinner-border spinner-border-sm me-2' role='status' />
 							Criando...
 						</>
 					) : (
