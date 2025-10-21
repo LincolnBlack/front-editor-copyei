@@ -2,7 +2,6 @@ import React from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import { pageLayoutTypesPagesMenu } from '../../../menu';
 import Page from '../../../layout/Page/Page';
@@ -32,11 +31,8 @@ const Index: NextPage = () => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale, ['common', 'menu'])),
-	},
-});
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
+});});
 
 export default Index;

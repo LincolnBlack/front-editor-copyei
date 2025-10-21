@@ -2,7 +2,6 @@ import React from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 
@@ -23,10 +22,8 @@ const Index: NextPage = () => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		...(await serverSideTranslations(locale || 'pt', ['common', 'menu'])),
-	},
-});
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
+});});
 
 export default Index;

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState, useCallback, useMemo } from 're
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTour } from '@reactour/tour';
 import { useRouter } from 'next/router';
 import PageWrapper from '../layout/PageWrapper/PageWrapper';
@@ -628,11 +627,8 @@ const Index: NextPage = () => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale, ['common', 'menu'])),
-	},
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
 });
 
 export default Index;

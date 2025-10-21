@@ -158,6 +158,6 @@ export const adminPagesMenu = {
 		id: 'webhooks',
 		text: 'Webhooks',
 		path: 'admin/webhooks',
-		icon: 'Webhook',
+		icon: 'Api',
 	},
 };

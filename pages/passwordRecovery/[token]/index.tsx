@@ -2,7 +2,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import classNames from 'classnames';
@@ -335,10 +334,7 @@ const passwordRecovery: NextPage = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale ?? 'en', ['common', 'menu'])),
-	},
-});
+	props: {},
+});});
 
 export default passwordRecovery;

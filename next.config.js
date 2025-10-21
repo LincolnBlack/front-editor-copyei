@@ -1,4 +1,3 @@
-const { i18n } = require('./next-i18next.config');
 const withImages = require('next-images');
 const withInterceptStdout = require('next-intercept-stdout');
 
@@ -18,7 +17,6 @@ const nextConfig = withInterceptStdout(
 			disableStaticImages: true
 		},
 		reactStrictMode: true,
-		i18n,
 		webpack(config, options) {
 			return config
 		}

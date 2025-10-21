@@ -4,7 +4,6 @@ import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useDarkMode from '../../../hooks/useDarkMode';
 import PaginationButtons, {
 	dataPagination,
@@ -506,11 +505,8 @@ const Index: NextPage = () => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale, ['common', 'menu'])),
-	},
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
 });
 
 export default Index;

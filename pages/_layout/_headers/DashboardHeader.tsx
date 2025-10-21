@@ -1,6 +1,5 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
 import Header, { HeaderLeft, HeaderRight } from '../../../layout/Header/Header';
 import Popovers from '../../../components/bootstrap/Popovers';
 import Button, { IButtonProps } from '../../../components/bootstrap/Button';
@@ -26,19 +25,6 @@ const DashboardHeader = () => {
 		size: 'lg',
 	};
 
-	const { i18n } = useTranslation();
-
-	const changeLanguage = (lng: ILang['key']['lng']) => {
-		i18n.changeLanguage(lng);
-		router.push(router.pathname, router.pathname, { locale: lng });
-		showNotification(
-			<span className='d-flex align-items-center'>
-				<Icon icon={getLangWithKey(lng)?.icon} size='lg' className='me-1' />
-				<span>{`Language changed to ${getLangWithKey(lng)?.text}`}</span>
-			</span>,
-			'You updated the language of the site. (Only "Aside" was prepared as an example.)',
-		);
-	};
 
 	return (
 		<Header>

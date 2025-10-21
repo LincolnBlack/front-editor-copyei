@@ -2,7 +2,6 @@ import React, { FC, useCallback, useContext, useState } from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import classNames from 'classnames';
@@ -340,11 +339,8 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale, ['common', 'menu'])),
-	},
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
 });
 
 export default Login;

@@ -11,7 +11,6 @@ import React, {
 import classNames from 'classnames';
 import { useWindowSize } from 'react-use';
 import { Manager, Popper, Reference } from 'react-popper';
-import { useTranslation } from 'next-i18next';
 import Icon from '../../components/icon/Icon';
 import ThemeContext from '../../context/themeContext';
 import Collapse from '../../components/bootstrap/Collapse';
@@ -111,7 +110,6 @@ export const Item: FC<IItemProps> = ({
 	// For top menu
 	const match = to !== '/' && router.pathname === to;
 
-	const { t } = useTranslation('menu');
 
 	const LINK_CLASS = classNames('navigation-link', 'navigation-link-pill', {
 		collapsed: !!children && !isHorizontal,
@@ -122,7 +120,7 @@ export const Item: FC<IItemProps> = ({
 		<>
 			<span className='navigation-link-info'>
 				{icon && <Icon className='navigation-icon' icon={icon} />}
-				{title && <span className='navigation-text'>{t(title)}</span>}
+				{title && <span className='navigation-text'>{title}</span>}
 			</span>
 			{(!!children || !!notification) && (
 				<span className='navigation-link-extra'>
@@ -338,7 +336,6 @@ const Navigation = forwardRef<HTMLElement, INavigationProps>(
 	({ menu, horizontal, id, className, ...props }, ref) => {
 		const [activeItem, setActiveItem] = useState(undefined);
 
-		const { t } = useTranslation('menu');
 
 		function fillMenu(
 			data:
@@ -391,7 +388,7 @@ const Navigation = forwardRef<HTMLElement, INavigationProps>(
 					</Item>
 				) : (
 					!isMore && !isHorizontal && (
-						<NavigationTitle key={data[item].id}>{t(data[item].text)}</NavigationTitle>
+						<NavigationTitle key={data[item].id}>{data[item].text}</NavigationTitle>
 					)
 				);
 			});
@@ -406,7 +403,7 @@ const Navigation = forwardRef<HTMLElement, INavigationProps>(
 					{horizontal && (
 						<Item
 							rootId={`other-${id}`}
-							title={t('More') as string}
+							title='More'
 							icon='MoreHoriz'
 							isHorizontal
 							isMore>

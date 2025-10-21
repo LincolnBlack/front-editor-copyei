@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { GetStaticProps } from 'next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Brand from '../../../layout/Brand/Brand';
 import Navigation, { NavigationLine } from '../../../layout/Navigation/Navigation';
 import ThemeContext from '../../../context/themeContext';
@@ -38,11 +37,8 @@ const DefaultAside = () => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale, ['common', 'menu'])),
-	},
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
 });
 
 export default DefaultAside;

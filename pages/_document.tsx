@@ -1,7 +1,6 @@
 import React from 'react';
 import { Head, Html, Main, NextScript } from 'next/document';
 import { GetStaticProps } from 'next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const Document = () => {
 	return (
@@ -17,11 +16,8 @@ const Document = () => {
 	);
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-	props: {
-		// @ts-ignore
-		...(await serverSideTranslations(locale, ['translation', 'menu'])),
-	},
+export const getStaticProps: GetStaticProps = async () => ({
+	props: {},
 });
 
 export default Document;
