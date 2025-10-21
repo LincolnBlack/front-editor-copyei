@@ -16,7 +16,6 @@ import Modal, { ModalHeader, ModalBody, ModalFooter } from '../components/bootst
 import Input from '../components/bootstrap/forms/Input';
 import PaginationButtons, { PER_COUNT } from '../components/PaginationButtons';
 import websiteService, { WebsiteTemplate } from '../services/websiteService';
-import { useAdminAuth } from '../hooks/useAdminAuth';
 import useDarkMode from '../hooks/useDarkMode';
 
 const Index: NextPage = () => {
@@ -24,7 +23,6 @@ const Index: NextPage = () => {
 	const router = useRouter();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const { darkModeStatus } = useDarkMode();
-	const { loading: authLoading, isAuthorized } = useAdminAuth();
 
 	// Estados para listagem de websites
 	const [websites, setWebsites] = useState<WebsiteTemplate[]>([]);
@@ -69,9 +67,7 @@ const Index: NextPage = () => {
 	// Verificar se há mensagem de erro na URL
 	useEffect(() => {
 		if (router.query.error === 'unauthorized') {
-			setErrorMessage(
-				'Você não tem permissão para acessar essa área. Apenas administradores podem acessar o painel administrativo.',
-			);
+			setErrorMessage('Você não tem permissão para acessar essa área.');
 			// Limpar o parâmetro da URL
 			router.replace('/', undefined, { shallow: true });
 		}
@@ -79,10 +75,8 @@ const Index: NextPage = () => {
 
 	// Buscar websites quando o componente montar
 	useEffect(() => {
-		if (isAuthorized) {
-			fetchWebsites();
-		}
-	}, [isAuthorized, fetchWebsites]);
+		fetchWebsites();
+	}, [fetchWebsites]);
 
 	// Resetar página quando filtros mudarem
 	useEffect(() => {
@@ -209,215 +203,258 @@ const Index: NextPage = () => {
 	// Calcular total de páginas
 	const totalPages = Math.ceil(filteredAndSortedData.length / perPage);
 
-	// Se está carregando a autenticação, mostra loading
-	if (authLoading) {
-		return (
-			<div
-				className='d-flex justify-content-center align-items-center'
-				style={{ height: '100vh' }}>
-				<div className='spinner-border text-primary' role='status'>
-					<span className='visually-hidden'>Verificando permissões...</span>
-				</div>
-			</div>
-		);
-	}
-
-	// Se não está autorizado, não renderiza nada (já redirecionou)
-	if (!isAuthorized) {
-		return null;
-	}
-
 	return (
 		<PageWrapper>
 			<Head>
 				<title>Dashboard - Páginas Publicadas</title>
 			</Head>
-			<SubHeader>
-				<SubHeaderLeft>
-					<Input
-						type='text'
-						placeholder='Buscar por subdomínio ou domínio...'
-						value={domainFilter}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-							setDomainFilter(e.target.value)
-						}
-						style={{ minWidth: '300px', maxWidth: '500px' }}
-					/>
-				</SubHeaderLeft>
-				<SubHeaderRight>
-					{hasActiveFilters && (
-						<Button
-							icon='Clear'
-							color='warning'
-							className='me-2'
-							style={{
-								backgroundColor: '#ffc107',
-								color: '#000000',
-								border: '1px solid #ffc107',
-							}}
-							onClick={handleClearFilters}>
-							Limpar filtros
-						</Button>
+			{!loading && filteredAndSortedData.length === 0 ? (
+				<Page>
+					{errorMessage && (
+						<Alert color='danger' className='mb-4'>
+							{errorMessage}
+						</Alert>
 					)}
-				</SubHeaderRight>
-			</SubHeader>
-			<Page>
-				{errorMessage && (
-					<Alert color='danger' className='mb-4'>
-						{errorMessage}
-					</Alert>
-				)}
-
-				<div className='row h-100'>
-					<div className='col-12'>
-						<Card stretch>
-							<CardBody isScrollable className='table-responsive'>
-								{loading ? (
-									<div className='d-flex justify-content-center align-items-center py-5'>
-										<div className='spinner-border text-primary' role='status'>
-											<span className='visually-hidden'>Carregando...</span>
-										</div>
+					<div className='row h-100'>
+						<div className='col-12'>
+							<Card stretch>
+								<CardBody className='d-flex flex-column align-items-center justify-content-center py-5'>
+									<div className='text-center'>
+										<Icon
+											icon='CloudUpload'
+											size='3x'
+											className='text-muted mb-4'
+										/>
+										<h4 className='text-muted mb-3'>
+											Você ainda não tem páginas publicadas
+										</h4>
+										<p className='text-muted mb-0'>
+											Comece criando sua primeira página para vê-la aqui.
+										</p>
 									</div>
-								) : (
-									<table className='table table-modern table-hover'>
-										<thead>
-											<tr>
-												<th>Nome da página</th>
-												<th>Seu site</th>
-												<th>Clonado de</th>
-												<th>Ações</th>
-											</tr>
-										</thead>
-										<tbody>
-											{paginatedData.map((website) => (
-												<tr key={website.id}>
-													<td>
-														<div className='d-flex align-items-center'>
-															<div className='flex-shrink-0'>
-																<div
-																	className='ratio ratio-1x1 me-3'
-																	style={{ width: 48 }}>
-																	<div
-																		className={`bg-l${
-																			darkModeStatus
-																				? 'o25'
-																				: '25'
-																		}-primary text-primary rounded-2 d-flex align-items-center justify-content-center`}>
-																		<span className='fw-bold'>
-																			{website.subdomain
-																				.charAt(0)
-																				.toUpperCase()}
-																		</span>
+								</CardBody>
+							</Card>
+						</div>
+					</div>
+				</Page>
+			) : (
+				<>
+					<SubHeader>
+						<SubHeaderLeft>
+							<Input
+								type='text'
+								placeholder='Buscar por subdomínio ou domínio...'
+								value={domainFilter}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									setDomainFilter(e.target.value)
+								}
+								style={{ minWidth: '300px', maxWidth: '500px' }}
+							/>
+						</SubHeaderLeft>
+						<SubHeaderRight>
+							{hasActiveFilters && (
+								<Button
+									icon='Clear'
+									color='warning'
+									className='me-2'
+									style={{
+										backgroundColor: '#ffc107',
+										color: '#000000',
+										border: '1px solid #ffc107',
+									}}
+									onClick={handleClearFilters}>
+									Limpar filtros
+								</Button>
+							)}
+						</SubHeaderRight>
+					</SubHeader>
+					<Page>
+						{errorMessage && (
+							<Alert color='danger' className='mb-4'>
+								{errorMessage}
+							</Alert>
+						)}
+
+						<div className='row h-100'>
+							<div className='col-12'>
+								<Card stretch>
+									<CardBody isScrollable className='table-responsive'>
+										{loading ? (
+											<div className='d-flex justify-content-center align-items-center py-5'>
+												<div
+													className='spinner-border text-primary'
+													role='status'>
+													<span className='visually-hidden'>
+														Carregando...
+													</span>
+												</div>
+											</div>
+										) : (
+											<table className='table table-modern table-hover'>
+												<thead>
+													<tr>
+														<th>Nome da página</th>
+														<th>Seu site</th>
+														<th>Clonado de</th>
+														<th>Ações</th>
+													</tr>
+												</thead>
+												<tbody>
+													{paginatedData.map((website) => (
+														<tr key={website.id}>
+															<td>
+																<div className='d-flex align-items-center'>
+																	<div className='flex-shrink-0'>
+																		<div
+																			className='ratio ratio-1x1 me-3'
+																			style={{ width: 48 }}>
+																			<div
+																				className={`bg-l${
+																					darkModeStatus
+																						? 'o25'
+																						: '25'
+																				}-primary text-primary rounded-2 d-flex align-items-center justify-content-center`}>
+																				<span className='fw-bold'>
+																					{website.subdomain
+																						.charAt(0)
+																						.toUpperCase()}
+																				</span>
+																			</div>
+																		</div>
+																	</div>
+																	<div className='flex-grow-1'>
+																		<div className='fs-6 fw-bold'>
+																			{website.subdomain}
+																		</div>
 																	</div>
 																</div>
-															</div>
-															<div className='flex-grow-1'>
-																<div className='fs-6 fw-bold'>
-																	{website.subdomain}
-																</div>
-															</div>
-														</div>
-													</td>
-													<td>
-														<div className='fs-6'>
-															{(() => {
-																// Verificar se foi criado há mais de 4 minutos
-																const fourMinutesAgo = new Date(
-																	Date.now() - 4 * 60 * 1000,
-																);
-																const websiteCreatedAt = new Date(
-																	website.created_at,
-																);
-																const isOlderThan4Minutes =
-																	websiteCreatedAt <
-																	fourMinutesAgo;
+															</td>
+															<td>
+																<div className='fs-6'>
+																	{(() => {
+																		// Verificar se foi criado há mais de 4 minutos
+																		const fourMinutesAgo =
+																			new Date(
+																				Date.now() -
+																					4 * 60 * 1000,
+																			);
+																		const websiteCreatedAt =
+																			new Date(
+																				website.created_at,
+																			);
+																		const isOlderThan4Minutes =
+																			websiteCreatedAt <
+																			fourMinutesAgo;
 
-																// Só torna clicável se foi criado há mais de 4 minutos
-																if (
-																	isOlderThan4Minutes &&
-																	website.cloudfront_distribution_domain
-																) {
-																	return (
+																		// Só torna clicável se foi criado há mais de 4 minutos
+																		if (
+																			isOlderThan4Minutes &&
+																			website.cloudfront_distribution_domain
+																		) {
+																			return (
+																				<a
+																					href={`https://${website.subdomain}.${website.Domain.domain}`}
+																					target='_blank'
+																					rel='noopener noreferrer'
+																					className='text-decoration-none'>
+																					{
+																						website.subdomain
+																					}
+																					.
+																					{
+																						website
+																							.Domain
+																							.domain
+																					}
+																				</a>
+																			);
+																		} else {
+																			return (
+																				<span>
+																					{
+																						website.subdomain
+																					}
+																					.
+																					{
+																						website
+																							.Domain
+																							.domain
+																					}
+																				</span>
+																			);
+																		}
+																	})()}
+																</div>
+															</td>
+															<td>
+																<div
+																	className='fs-6 text-truncate'
+																	style={{ maxWidth: '200px' }}>
+																	{website.clone_url ? (
 																		<a
-																			href={`https://${website.subdomain}.${website.Domain.domain}`}
+																			href={website.clone_url}
 																			target='_blank'
 																			rel='noopener noreferrer'
 																			className='text-decoration-none'>
-																			{website.subdomain}.
-																			{website.Domain.domain}
+																			{website.clone_url}
 																		</a>
-																	);
-																} else {
-																	return (
-																		<span>
-																			{website.subdomain}.
-																			{website.Domain.domain}
+																	) : (
+																		<span className='text-muted'>
+																			Não disponível
 																		</span>
-																	);
-																}
-															})()}
-														</div>
-													</td>
-													<td>
-														<div
-															className='fs-6 text-truncate'
-															style={{ maxWidth: '200px' }}>
-															{website.clone_url ? (
-																<a
-																	href={website.clone_url}
-																	target='_blank'
-																	rel='noopener noreferrer'
-																	className='text-decoration-none'>
-																	{website.clone_url}
-																</a>
-															) : (
-																<span className='text-muted'>
-																	Não disponível
-																</span>
-															)}
-														</div>
-													</td>
-													<td>
-														<Button
-															color='primary'
-															isLight
-															size='sm'
-															className='me-2'
-															onClick={() =>
-																handlePublishWebsite(website)
-															}>
-															<Icon icon='CloudUpload' size='lg' />
-														</Button>
-														<Button
-															color='danger'
-															isLight
-															size='sm'
-															onClick={() =>
-																handleOpenDeleteModal(website)
-															}>
-															<Icon icon='Delete' size='lg' />
-														</Button>
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								)}
-							</CardBody>
-							<PaginationButtons
-								data={filteredAndSortedData}
-								label='páginas publicadas'
-								setCurrentPage={setCurrentPage}
-								currentPage={currentPage}
-								perPage={perPage}
-								setPerPage={setPerPage}
-								totalItems={filteredAndSortedData.length}
-								totalPages={totalPages}
-							/>
-						</Card>
-					</div>
-				</div>
-			</Page>
+																	)}
+																</div>
+															</td>
+															<td>
+																<Button
+																	color='primary'
+																	isLight
+																	size='sm'
+																	className='me-2'
+																	onClick={() =>
+																		handlePublishWebsite(
+																			website,
+																		)
+																	}>
+																	<Icon
+																		icon='CloudUpload'
+																		size='lg'
+																	/>
+																</Button>
+																<Button
+																	color='danger'
+																	isLight
+																	size='sm'
+																	onClick={() =>
+																		handleOpenDeleteModal(
+																			website,
+																		)
+																	}>
+																	<Icon icon='Delete' size='lg' />
+																</Button>
+															</td>
+														</tr>
+													))}
+												</tbody>
+											</table>
+										)}
+									</CardBody>
+									<PaginationButtons
+										data={filteredAndSortedData}
+										label='páginas publicadas'
+										setCurrentPage={setCurrentPage}
+										currentPage={currentPage}
+										perPage={perPage}
+										setPerPage={setPerPage}
+										totalItems={filteredAndSortedData.length}
+										totalPages={totalPages}
+									/>
+								</Card>
+							</div>
+						</div>
+					</Page>
+				</>
+			)}
 
 			{/* Modal de configuração do domínio */}
 			<Modal

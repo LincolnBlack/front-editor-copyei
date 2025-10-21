@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import useDarkMode from '../../hooks/useDarkMode';
+import { usePermissions } from '../../hooks/usePermissions';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import SubHeader, { SubHeaderLeft, SubHeaderRight } from '../../layout/SubHeader/SubHeader';
 import Icon from '../../components/icon/Icon';
@@ -16,12 +17,10 @@ import { getFirstLetter } from '../../helpers/helpers';
 import Badge from '../../components/bootstrap/Badge';
 import PaginationButtons, { PER_COUNT } from '../../components/PaginationButtons';
 import domainService, { Domain } from '../../services/domainService';
-import { useAdminAuth } from '../../hooks/useAdminAuth';
 
 const Domains: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
-	const { loading: authLoading, isAuthorized } = useAdminAuth();
-
+	const { hasPermission, loading: permissionsLoading } = usePermissions();
 	const [data, setData] = useState<Domain[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -276,202 +275,261 @@ const Domains: NextPage = () => {
 	// Calcular total de páginas
 	const totalPages = Math.ceil(filteredAndSortedData.length / perPage);
 
-	// Se está carregando a autenticação, mostra loading
-	if (authLoading) {
-		return (
-			<div
-				className='d-flex justify-content-center align-items-center'
-				style={{ height: '100vh' }}>
-				<div className='spinner-border text-primary' role='status'>
-					<span className='visually-hidden'>Verificando permissões...</span>
-				</div>
-			</div>
-		);
-	}
+	// Verificar se o usuário tem permissão para acessar domínios
+	const hasCustomDomainsPermission = hasPermission('custom_domains');
 
-	// Se não está autorizado, não renderiza nada (já redirecionou)
-	if (!isAuthorized) {
-		return null;
+	// Se não tem permissão, mostrar tela de bloqueio
+	if (!permissionsLoading && !hasCustomDomainsPermission) {
+		return (
+			<PageWrapper>
+				<Page>
+					<div className='row h-100'>
+						<div className='col-12'>
+							<Card stretch>
+								<CardBody className='d-flex flex-column align-items-center justify-content-center py-5'>
+									<div className='text-center'>
+										<Icon icon='Lock' size='4x' className='text-muted mb-4' />
+										<h4 className='text-muted mb-3'>
+											Cadastro de domínio não disponível neste plano
+										</h4>
+										<p className='text-muted mb-4'>
+											Ative essa funcionalidade com um upgrade
+										</p>
+									</div>
+								</CardBody>
+							</Card>
+						</div>
+					</div>
+				</Page>
+			</PageWrapper>
+		);
 	}
 
 	return (
 		<PageWrapper>
-			<SubHeader>
-				<SubHeaderLeft>
-					<Input
-						type='text'
-						placeholder='Buscar por domínio...'
-						value={domainFilter}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-							setDomainFilter(e.target.value)
-						}
-						style={{ minWidth: '300px', maxWidth: '500px' }}
-					/>
-				</SubHeaderLeft>
-				<SubHeaderRight>
-					{hasActiveFilters && (
-						<Button
-							icon='Clear'
-							color='warning'
-							className='me-2'
-							style={{
-								backgroundColor: '#ffc107',
-								color: '#000000',
-								border: '1px solid #ffc107',
-							}}
-							onClick={handleClearFilters}>
-							Limpar filtros
-						</Button>
-					)}
-					<Button
-						icon='FilterList'
-						color={filtersModalStatus ? 'primary' : 'info'}
-						isLight={!filtersModalStatus}
-						className='me-2'
-						onClick={
-							filtersModalStatus ? handleCloseFiltersModal : handleOpenFiltersModal
-						}>
-						Filtros
-					</Button>
-					<Button
-						icon='Add'
-						color='primary'
-						isLight
-						onClick={handleOpenCreateDomainModal}>
-						Novo domínio
-					</Button>
-				</SubHeaderRight>
-			</SubHeader>
-			<Page>
-				<div className='row h-100'>
-					<div className='col-12'>
-						{/* Card de Filtros */}
-						{filtersModalStatus && (
-							<Card className='mb-3'>
-								<CardBody>
-									<div className='row g-3'>
-										<div className='col-md-6'>
-											<label htmlFor='status-filter' className='form-label'>
-												Status
-											</label>
-											<Select
-												id='status-filter'
-												ariaLabel='Filtrar por status'
-												value={statusFilter}
-												onChange={(
-													e: React.ChangeEvent<HTMLSelectElement>,
-												) => setStatusFilter(e.target.value)}>
-												<Option value=''>Todos os status</Option>
-												<Option value='ISSUED'>Válido</Option>
-												<Option value='PENDING_VALIDATION'>
-													Pendente de Validação
-												</Option>
-												<Option value='FAILED'>Falhou</Option>
-											</Select>
-										</div>
+			{!loading && filteredAndSortedData.length === 0 ? (
+				<Page>
+					<div className='row h-100'>
+						<div className='col-12'>
+							<Card stretch>
+								<CardBody className='d-flex flex-column align-items-center justify-content-center py-5'>
+									<div className='text-center'>
+										<Icon icon='Add' size='3x' className='text-muted mb-4' />
+										<h4 className='text-muted mb-3'>
+											Você ainda não tem domínios cadastrados
+										</h4>
+										<p className='text-muted mb-4'>
+											Comece adicionando seu primeiro domínio para vê-lo aqui.
+										</p>
+										<Button
+											icon='Add'
+											color='primary'
+											onClick={handleOpenCreateDomainModal}
+											size='lg'>
+											Novo domínio
+										</Button>
 									</div>
 								</CardBody>
 							</Card>
-						)}
+						</div>
+					</div>
+				</Page>
+			) : (
+				<>
+					<SubHeader>
+						<SubHeaderLeft>
+							<Input
+								type='text'
+								placeholder='Buscar por domínio...'
+								value={domainFilter}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									setDomainFilter(e.target.value)
+								}
+								style={{ minWidth: '300px', maxWidth: '500px' }}
+							/>
+						</SubHeaderLeft>
+						<SubHeaderRight>
+							{hasActiveFilters && (
+								<Button
+									icon='Clear'
+									color='warning'
+									className='me-2'
+									style={{
+										backgroundColor: '#ffc107',
+										color: '#000000',
+										border: '1px solid #ffc107',
+									}}
+									onClick={handleClearFilters}>
+									Limpar filtros
+								</Button>
+							)}
+							<Button
+								icon='FilterList'
+								color={filtersModalStatus ? 'primary' : 'info'}
+								isLight={!filtersModalStatus}
+								className='me-2'
+								onClick={
+									filtersModalStatus
+										? handleCloseFiltersModal
+										: handleOpenFiltersModal
+								}>
+								Filtros
+							</Button>
+							<Button
+								icon='Add'
+								color='primary'
+								isLight
+								onClick={handleOpenCreateDomainModal}>
+								Novo domínio
+							</Button>
+						</SubHeaderRight>
+					</SubHeader>
+					<Page>
+						<div className='row h-100'>
+							<div className='col-12'>
+								{/* Card de Filtros */}
+								{filtersModalStatus && (
+									<Card className='mb-3'>
+										<CardBody>
+											<div className='row g-3'>
+												<div className='col-md-6'>
+													<label
+														htmlFor='status-filter'
+														className='form-label'>
+														Status
+													</label>
+													<Select
+														id='status-filter'
+														ariaLabel='Filtrar por status'
+														value={statusFilter}
+														onChange={(
+															e: React.ChangeEvent<HTMLSelectElement>,
+														) => setStatusFilter(e.target.value)}>
+														<Option value=''>Todos os status</Option>
+														<Option value='ISSUED'>Válido</Option>
+														<Option value='PENDING_VALIDATION'>
+															Pendente de Validação
+														</Option>
+														<Option value='FAILED'>Falhou</Option>
+													</Select>
+												</div>
+											</div>
+										</CardBody>
+									</Card>
+								)}
 
-						<Card stretch>
-							<CardBody isScrollable className='table-responsive'>
-								{loading ? (
-									<div className='d-flex justify-content-center align-items-center py-5'>
-										<div className='spinner-border text-primary' role='status'>
-											<span className='visually-hidden'>Carregando...</span>
-										</div>
-									</div>
-								) : (
-									<table className='table table-modern table-hover'>
-										<thead>
-											<tr>
-												<th>Nome do domínio</th>
-												<th>Status</th>
-												<th>Ações</th>
-											</tr>
-										</thead>
-										<tbody>
-											{paginatedData.map((domain) => (
-												<tr key={domain.id}>
-													<td>
-														<div className='d-flex align-items-center'>
-															<div className='flex-shrink-0'>
-																<div
-																	className='ratio ratio-1x1 me-3'
-																	style={{ width: 48 }}>
-																	<div
-																		className={`bg-l${
-																			darkModeStatus
-																				? 'o25'
-																				: '25'
-																		}-primary text-primary rounded-2 d-flex align-items-center justify-content-center`}>
-																		<span className='fw-bold'>
-																			{getFirstLetter(
-																				domain.domain,
-																			)}
-																		</span>
+								<Card stretch>
+									<CardBody isScrollable className='table-responsive'>
+										{loading ? (
+											<div className='d-flex justify-content-center align-items-center py-5'>
+												<div
+													className='spinner-border text-primary'
+													role='status'>
+													<span className='visually-hidden'>
+														Carregando...
+													</span>
+												</div>
+											</div>
+										) : (
+											<table className='table table-modern table-hover'>
+												<thead>
+													<tr>
+														<th>Nome do domínio</th>
+														<th>Status</th>
+														<th>Ações</th>
+													</tr>
+												</thead>
+												<tbody>
+													{paginatedData.map((domain) => (
+														<tr key={domain.id}>
+															<td>
+																<div className='d-flex align-items-center'>
+																	<div className='flex-shrink-0'>
+																		<div
+																			className='ratio ratio-1x1 me-3'
+																			style={{ width: 48 }}>
+																			<div
+																				className={`bg-l${
+																					darkModeStatus
+																						? 'o25'
+																						: '25'
+																				}-primary text-primary rounded-2 d-flex align-items-center justify-content-center`}>
+																				<span className='fw-bold'>
+																					{getFirstLetter(
+																						domain.domain,
+																					)}
+																				</span>
+																			</div>
+																		</div>
+																	</div>
+																	<div className='flex-grow-1'>
+																		<div className='fs-6 fw-bold'>
+																			{domain.domain}
+																		</div>
 																	</div>
 																</div>
-															</div>
-															<div className='flex-grow-1'>
-																<div className='fs-6 fw-bold'>
-																	{domain.domain}
-																</div>
-															</div>
-														</div>
-													</td>
-													<td>
-														<Badge
-															color={getStatusColor(domain.status)}
-															className='text-uppercase'>
-															{getStatusText(domain.status)}
-														</Badge>
-													</td>
-													<td>
-														<Button
-															color='primary'
-															isLight
-															size='sm'
-															className='me-2'
-															onClick={() =>
-																handleOpenDomainActivationModal(
-																	domain,
-																)
-															}>
-															<Icon icon='CloudUpload' size='lg' />{' '}
-															Ativar
-														</Button>
-														<Button
-															color='danger'
-															isLight
-															size='sm'
-															onClick={() =>
-																handleOpenDeleteModal(domain)
-															}>
-															<Icon icon='Delete' size='lg' /> Deletar
-														</Button>
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								)}
-							</CardBody>
-							<PaginationButtons
-								data={filteredAndSortedData}
-								label='domínios'
-								setCurrentPage={setCurrentPage}
-								currentPage={currentPage}
-								perPage={perPage}
-								setPerPage={setPerPage}
-								totalItems={filteredAndSortedData.length}
-								totalPages={totalPages}
-							/>
-						</Card>
-					</div>
-				</div>
-			</Page>
+															</td>
+															<td>
+																<Badge
+																	color={getStatusColor(
+																		domain.status,
+																	)}
+																	className='text-uppercase'>
+																	{getStatusText(domain.status)}
+																</Badge>
+															</td>
+															<td>
+																<Button
+																	color='primary'
+																	isLight
+																	size='sm'
+																	className='me-2'
+																	onClick={() =>
+																		handleOpenDomainActivationModal(
+																			domain,
+																		)
+																	}>
+																	<Icon
+																		icon='CloudUpload'
+																		size='lg'
+																	/>{' '}
+																	Ativar
+																</Button>
+																<Button
+																	color='danger'
+																	isLight
+																	size='sm'
+																	onClick={() =>
+																		handleOpenDeleteModal(
+																			domain,
+																		)
+																	}>
+																	<Icon icon='Delete' size='lg' />{' '}
+																	Deletar
+																</Button>
+															</td>
+														</tr>
+													))}
+												</tbody>
+											</table>
+										)}
+									</CardBody>
+									<PaginationButtons
+										data={filteredAndSortedData}
+										label='domínios'
+										setCurrentPage={setCurrentPage}
+										currentPage={currentPage}
+										perPage={perPage}
+										setPerPage={setPerPage}
+										totalItems={filteredAndSortedData.length}
+										totalPages={totalPages}
+									/>
+								</Card>
+							</div>
+						</div>
+					</Page>
+				</>
+			)}
 
 			{/* Modal de criação de domínio */}
 			<Modal

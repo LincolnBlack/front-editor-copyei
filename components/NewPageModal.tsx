@@ -3,6 +3,7 @@ import Modal, { ModalHeader, ModalBody, ModalFooter } from './bootstrap/Modal';
 import Button from './bootstrap/Button';
 import Card, { CardBody } from './bootstrap/Card';
 import Icon from './icon/Icon';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface NewPageOption {
 	id: string;
@@ -11,6 +12,7 @@ interface NewPageOption {
 	icon: string;
 	color: string;
 	borderColor: string;
+	permission: string;
 	onClick: () => void;
 }
 
@@ -21,6 +23,8 @@ interface NewPageModalProps {
 }
 
 const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOption }) => {
+	const { hasPermission } = usePermissions();
+
 	// Lista de opções para criação de nova página
 	const newPageOptions: NewPageOption[] = [
 		{
@@ -30,6 +34,7 @@ const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOp
 			icon: 'ContentCopy',
 			color: 'text-success',
 			borderColor: 'border-success',
+			permission: 'clone_website',
 			onClick: () => {
 				onSelectOption('copy');
 			},
@@ -42,6 +47,7 @@ const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOp
 			icon: 'AutoAwesome',
 			color: 'text-primary',
 			borderColor: 'border-primary',
+			permission: 'generate_template',
 			onClick: () => {
 				onSelectOption('ai-generate');
 			},
@@ -54,6 +60,7 @@ const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOp
 			icon: 'FolderMatch',
 			color: 'text-info',
 			borderColor: 'border-info',
+			permission: 'drag_and_drop_template',
 			onClick: () => {
 				onSelectOption('template');
 			},
@@ -65,6 +72,7 @@ const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOp
 			icon: 'UploadFile',
 			color: 'text-secondary',
 			borderColor: 'border-secondary',
+			permission: 'website_visits',
 			onClick: () => {
 				onSelectOption('import-html');
 			},
@@ -76,6 +84,7 @@ const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOp
 			icon: 'AddBox',
 			color: 'text-warning',
 			borderColor: 'border-warning',
+			permission: 'website_visits',
 			onClick: () => {
 				onSelectOption('blank');
 			},
@@ -89,25 +98,55 @@ const NewPageModal: React.FC<NewPageModalProps> = ({ isOpen, onClose, onSelectOp
 			</ModalHeader>
 			<ModalBody>
 				<div className='row g-3 p-3'>
-					{newPageOptions.map((option) => (
-						<div key={option.id} className='col-md-6'>
-							<Card
-								className={`h-100 cursor-pointer border-2 border-dashed ${option.borderColor}`}
-								onClick={option.onClick}>
-								<CardBody className='d-flex flex-column align-items-center text-center p-4'>
-									<div className='mb-3'>
-										<Icon
-											icon={option.icon}
-											size='3x'
-											className={option.color}
-										/>
-									</div>
-									<h6 className='fw-bold mb-2'>{option.title}</h6>
-									<p className='text-muted mb-0 small'>{option.description}</p>
-								</CardBody>
-							</Card>
-						</div>
-					))}
+					{newPageOptions.map((option) => {
+						const hasRequiredPermission = hasPermission(option.permission);
+
+						return (
+							<div key={option.id} className='col-md-6'>
+								<div className='position-relative'>
+									<Card
+										className={`h-100 border-2 border-dashed ${option.borderColor} ${
+											hasRequiredPermission ? 'cursor-pointer' : 'opacity-50'
+										}`}
+										onClick={
+											hasRequiredPermission ? option.onClick : undefined
+										}>
+										<CardBody className='d-flex flex-column align-items-center text-center p-4'>
+											<div className='mb-3'>
+												<Icon
+													icon={option.icon}
+													size='3x'
+													className={option.color}
+												/>
+											</div>
+											<h6 className='fw-bold mb-2'>{option.title}</h6>
+											<p className='text-muted mb-0 small'>
+												{option.description}
+											</p>
+										</CardBody>
+									</Card>
+
+									{!hasRequiredPermission && (
+										<div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-90 rounded'>
+											<div className='text-center p-3'>
+												<Icon
+													icon='Lock'
+													size='2x'
+													className='text-muted mb-2'
+												/>
+												<p className='text-muted mb-0 small fw-bold'>
+													{option.title} não habilitada no seu plano
+												</p>
+												<p className='text-muted mb-0 small'>
+													Libere essa função com um upgrade
+												</p>
+											</div>
+										</div>
+									)}
+								</div>
+							</div>
+						);
+					})}
 				</div>
 			</ModalBody>
 			<ModalFooter>

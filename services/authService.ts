@@ -119,6 +119,7 @@ export interface LoginResponse {
 		actions: {
 			[key: string]: number;
 		};
+		permissions: string[];
 	};
 }
 
@@ -145,6 +146,35 @@ export interface ChangePasswordCredentials {
 	newPassword: string;
 }
 
+export interface PlanAction {
+	action: {
+		id: number;
+		name: string;
+		description: string;
+		created_at: string;
+		updated_at: string;
+	};
+	operations_total: number;
+}
+
+export interface Plan {
+	id: number;
+	name: string;
+	description: string;
+	created_at: string;
+	updated_at: string;
+	planActions: PlanAction[];
+}
+
+export interface Subscription {
+	id: number;
+	plan_id: number;
+	active: boolean;
+	created_at: string;
+	updated_at: string;
+	plan: Plan;
+}
+
 export interface User {
 	data: {
 		user: {
@@ -156,6 +186,7 @@ export interface User {
 			createdAt: string;
 			updatedAt: string;
 		};
+		subscription?: Subscription;
 	};
 }
 
@@ -169,19 +200,7 @@ class AuthService {
 			// Extrair dados da resposta
 			const { accessToken, refreshToken } = response.data.data;
 
-			// Decodificar JWT para extrair informações do usuário
-			const tokenPayload = decodeJWT(accessToken);
-
-			// Criar objeto user a partir dos dados do token
-			const user = {
-				id: tokenPayload?.id || '',
-				email: tokenPayload?.email || credentials.email,
-				name: tokenPayload?.name || '',
-				role: tokenPayload?.role || '',
-				actions: tokenPayload?.actions || {},
-			};
-
-			// Salvar tokens no localStorage e cookies
+			// Salvar tokens no localStorage e cookies antes de chamar getMe
 			localStorage.setItem('jwt_token', accessToken);
 			localStorage.setItem('refresh_token', refreshToken);
 
@@ -193,6 +212,34 @@ class AuthService {
 			const savedCookie = getCookie('jwt_token');
 			console.log('Cookie salvo:', savedCookie ? 'Sim' : 'Não');
 			console.log('Valor do cookie:', savedCookie);
+
+			// Chamar getMe para validar subscription e obter permissões
+			const userData = await this.getMe();
+
+			// Validar se o usuário tem subscription ativa
+			if (!userData.data.subscription || !userData.data.subscription.active) {
+				// Limpar tokens se não tiver subscription ativa
+				this.logout();
+				throw new Error('Usuário não possui assinatura ativa');
+			}
+
+			// Extrair permissões do subscription
+			const permissions = userData.data.subscription.plan.planActions.map(
+				(planAction) => planAction.action.name,
+			);
+
+			// Decodificar JWT para extrair informações do usuário
+			const tokenPayload = decodeJWT(accessToken);
+
+			// Criar objeto user a partir dos dados do token e adicionar permissões
+			const user = {
+				id: tokenPayload?.id || userData.data.user.id,
+				email: tokenPayload?.email || userData.data.user.email,
+				name: tokenPayload?.name || userData.data.user.name,
+				role: tokenPayload?.role || userData.data.user.role,
+				actions: tokenPayload?.actions || {},
+				permissions,
+			};
 
 			return {
 				accessToken,
@@ -298,6 +345,15 @@ class AuthService {
 
 	isAdmin(user?: User): boolean {
 		return user?.data.user.role === 'ADMIN';
+	}
+
+	hasPermission(permission: string, user?: User): boolean {
+		if (!user?.data.subscription?.active) {
+			return false;
+		}
+		return user.data.subscription.plan.planActions.some(
+			(planAction) => planAction.action.name === permission,
+		);
 	}
 
 	async updateProfile(credentials: UpdateProfileCredentials): Promise<User> {

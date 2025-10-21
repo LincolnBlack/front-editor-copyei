@@ -17,7 +17,6 @@ import Badge from '../../components/bootstrap/Badge';
 import PaginationButtons, { PER_COUNT } from '../../components/PaginationButtons';
 import templateService, { UserTemplate, DeployTemplateData } from '../../services/templateService';
 import domainService, { Domain } from '../../services/domainService';
-import { useAdminAuth } from '../../hooks/useAdminAuth';
 import NewPageModal from '../../components/NewPageModal';
 import ClonePageModal from '../../components/ClonePageModal';
 import AIGenerateModal from '../../components/AIGenerateModal';
@@ -27,7 +26,6 @@ import BlankPageModal from '../../components/BlankPageModal';
 
 const Pages: NextPage = () => {
 	const { darkModeStatus } = useDarkMode();
-	const { loading: authLoading, isAuthorized } = useAdminAuth();
 
 	const [data, setData] = useState<UserTemplate[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -432,297 +430,340 @@ const Pages: NextPage = () => {
 	// Calcular total de páginas
 	const totalPages = Math.ceil(filteredAndSortedData.length / perPage);
 
-	// Se está carregando a autenticação, mostra loading
-	if (authLoading) {
-		return (
-			<div
-				className='d-flex justify-content-center align-items-center'
-				style={{ height: '100vh' }}>
-				<div className='spinner-border text-primary' role='status'>
-					<span className='visually-hidden'>Verificando permissões...</span>
-				</div>
-			</div>
-		);
-	}
-
-	// Se não está autorizado, não renderiza nada (já redirecionou)
-	if (!isAuthorized) {
-		return null;
-	}
-
 	return (
 		<PageWrapper>
-			<SubHeader>
-				<SubHeaderLeft>
-					<Input
-						type='text'
-						placeholder='Buscar por nome...'
-						value={nameFilter}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-							setNameFilter(e.target.value)
-						}
-						style={{ minWidth: '300px', maxWidth: '500px' }}
-					/>
-				</SubHeaderLeft>
-				<SubHeaderRight>
-					{hasActiveFilters && (
-						<Button
-							icon='Clear'
-							color='warning'
-							className='me-2'
-							style={{
-								backgroundColor: '#ffc107',
-								color: '#000000',
-								border: '1px solid #ffc107',
-							}}
-							onClick={handleClearFilters}>
-							Limpar filtros
-						</Button>
-					)}
-					<Button
-						icon='FilterList'
-						color={filtersModalStatus ? 'primary' : 'info'}
-						isLight={!filtersModalStatus}
-						className='me-2'
-						onClick={
-							filtersModalStatus ? handleCloseFiltersModal : handleOpenFiltersModal
-						}>
-						Filtros
-					</Button>
-					<Button icon='Add' color='primary' isLight onClick={handleOpenNewPageModal}>
-						Nova página
-					</Button>
-				</SubHeaderRight>
-			</SubHeader>
-			<Page>
-				<div className='row h-100'>
-					<div className='col-12'>
-						{/* Card de Filtros */}
-						{filtersModalStatus && (
-							<Card className='mb-3'>
-								<CardBody>
-									<div className='row g-3'>
-										<div className='col-md-4'>
-											<label htmlFor='type-filter' className='form-label'>
-												Tipo de criação
-											</label>
-											<Select
-												id='type-filter'
-												ariaLabel='Filtrar por tipo'
-												value={typeFilter}
-												onChange={(
-													e: React.ChangeEvent<HTMLSelectElement>,
-												) => setTypeFilter(e.target.value)}>
-												<Option value=''>Todos os tipos</Option>
-												<Option value='GENERATED'>Gerado pela IA</Option>
-												<Option value='CLONE'>Copiada</Option>
-												<Option value='DRAG_AND_DROP'>
-													A partir de um template
-												</Option>
-												<Option value='UPLOAD'>Importada</Option>
-											</Select>
-										</div>
-										<div className='col-md-4'>
-											<label
-												htmlFor='start-date-filter'
-												className='form-label'>
-												Data de início
-											</label>
-											<Input
-												id='start-date-filter'
-												type='date'
-												value={startDateFilter}
-												onChange={(
-													e: React.ChangeEvent<HTMLInputElement>,
-												) => setStartDateFilter(e.target.value)}
-											/>
-										</div>
-										<div className='col-md-4'>
-											<label htmlFor='end-date-filter' className='form-label'>
-												Data de fim
-											</label>
-											<Input
-												id='end-date-filter'
-												type='date'
-												value={endDateFilter}
-												onChange={(
-													e: React.ChangeEvent<HTMLInputElement>,
-												) => setEndDateFilter(e.target.value)}
-											/>
-										</div>
+			{!loading && filteredAndSortedData.length === 0 ? (
+				<Page>
+					<div className='row h-100'>
+						<div className='col-12'>
+							<Card stretch>
+								<CardBody className='d-flex flex-column align-items-center justify-content-center py-5'>
+									<div className='text-center'>
+										<Icon icon='Add' size='3x' className='text-muted mb-4' />
+										<h4 className='text-muted mb-3'>
+											Você ainda não tem páginas criadas
+										</h4>
+										<p className='text-muted mb-4'>
+											Comece criando sua primeira página para vê-la aqui.
+										</p>
+										<Button
+											icon='Add'
+											color='primary'
+											onClick={handleOpenNewPageModal}
+											size='lg'>
+											Nova página
+										</Button>
 									</div>
 								</CardBody>
 							</Card>
-						)}
+						</div>
+					</div>
+				</Page>
+			) : (
+				<>
+					<SubHeader>
+						<SubHeaderLeft>
+							<Input
+								type='text'
+								placeholder='Buscar por nome...'
+								value={nameFilter}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									setNameFilter(e.target.value)
+								}
+								style={{ minWidth: '300px', maxWidth: '500px' }}
+							/>
+						</SubHeaderLeft>
+						<SubHeaderRight>
+							{hasActiveFilters && (
+								<Button
+									icon='Clear'
+									color='warning'
+									className='me-2'
+									style={{
+										backgroundColor: '#ffc107',
+										color: '#000000',
+										border: '1px solid #ffc107',
+									}}
+									onClick={handleClearFilters}>
+									Limpar filtros
+								</Button>
+							)}
+							<Button
+								icon='FilterList'
+								color={filtersModalStatus ? 'primary' : 'info'}
+								isLight={!filtersModalStatus}
+								className='me-2'
+								onClick={
+									filtersModalStatus
+										? handleCloseFiltersModal
+										: handleOpenFiltersModal
+								}>
+								Filtros
+							</Button>
+							<Button
+								icon='Add'
+								color='primary'
+								isLight
+								onClick={handleOpenNewPageModal}>
+								Nova página
+							</Button>
+						</SubHeaderRight>
+					</SubHeader>
+					<Page>
+						<div className='row h-100'>
+							<div className='col-12'>
+								{/* Card de Filtros */}
+								{filtersModalStatus && (
+									<Card className='mb-3'>
+										<CardBody>
+											<div className='row g-3'>
+												<div className='col-md-4'>
+													<label
+														htmlFor='type-filter'
+														className='form-label'>
+														Tipo de criação
+													</label>
+													<Select
+														id='type-filter'
+														ariaLabel='Filtrar por tipo'
+														value={typeFilter}
+														onChange={(
+															e: React.ChangeEvent<HTMLSelectElement>,
+														) => setTypeFilter(e.target.value)}>
+														<Option value=''>Todos os tipos</Option>
+														<Option value='GENERATED'>
+															Gerado pela IA
+														</Option>
+														<Option value='CLONE'>Copiada</Option>
+														<Option value='DRAG_AND_DROP'>
+															A partir de um template
+														</Option>
+														<Option value='UPLOAD'>Importada</Option>
+													</Select>
+												</div>
+												<div className='col-md-4'>
+													<label
+														htmlFor='start-date-filter'
+														className='form-label'>
+														Data de início
+													</label>
+													<Input
+														id='start-date-filter'
+														type='date'
+														value={startDateFilter}
+														onChange={(
+															e: React.ChangeEvent<HTMLInputElement>,
+														) => setStartDateFilter(e.target.value)}
+													/>
+												</div>
+												<div className='col-md-4'>
+													<label
+														htmlFor='end-date-filter'
+														className='form-label'>
+														Data de fim
+													</label>
+													<Input
+														id='end-date-filter'
+														type='date'
+														value={endDateFilter}
+														onChange={(
+															e: React.ChangeEvent<HTMLInputElement>,
+														) => setEndDateFilter(e.target.value)}
+													/>
+												</div>
+											</div>
+										</CardBody>
+									</Card>
+								)}
 
-						<Card stretch>
-							<CardBody isScrollable className='table-responsive'>
-								{loading ? (
-									<div className='d-flex justify-content-center align-items-center py-5'>
-										<div className='spinner-border text-primary' role='status'>
-											<span className='visually-hidden'>Carregando...</span>
-										</div>
-									</div>
-								) : (
-									<table className='table table-modern table-hover'>
-										<thead>
-											<tr>
-												<th>Título</th>
-												<th>Tipo</th>
-												<th>Data da criação</th>
-												<th>Ações</th>
-											</tr>
-										</thead>
-										<tbody>
-											{paginatedData.map((i) => (
-												<tr key={i.id}>
-													<td>
-														<div className='d-flex align-items-center'>
-															<div className='flex-shrink-0'>
-																<div
-																	className='ratio ratio-1x1 me-3'
-																	style={{ width: 48 }}>
-																	<div
-																		className={`bg-l${
-																			darkModeStatus
-																				? 'o25'
-																				: '25'
-																		}-primary text-primary rounded-2 d-flex align-items-center justify-content-center`}>
-																		<span className='fw-bold'>
-																			{getFirstLetter(
-																				i.title,
-																			)}
-																		</span>
+								<Card stretch>
+									<CardBody isScrollable className='table-responsive'>
+										{loading ? (
+											<div className='d-flex justify-content-center align-items-center py-5'>
+												<div
+													className='spinner-border text-primary'
+													role='status'>
+													<span className='visually-hidden'>
+														Carregando...
+													</span>
+												</div>
+											</div>
+										) : (
+											<table className='table table-modern table-hover'>
+												<thead>
+													<tr>
+														<th>Título</th>
+														<th>Tipo</th>
+														<th>Data da criação</th>
+														<th>Ações</th>
+													</tr>
+												</thead>
+												<tbody>
+													{paginatedData.map((i) => (
+														<tr key={i.id}>
+															<td>
+																<div className='d-flex align-items-center'>
+																	<div className='flex-shrink-0'>
+																		<div
+																			className='ratio ratio-1x1 me-3'
+																			style={{ width: 48 }}>
+																			<div
+																				className={`bg-l${
+																					darkModeStatus
+																						? 'o25'
+																						: '25'
+																				}-primary text-primary rounded-2 d-flex align-items-center justify-content-center`}>
+																				<span className='fw-bold'>
+																					{getFirstLetter(
+																						i.title,
+																					)}
+																				</span>
+																			</div>
+																		</div>
+																	</div>
+																	<div className='flex-grow-1'>
+																		<div className='fs-6 fw-bold'>
+																			{i.title}
+																		</div>
 																	</div>
 																</div>
-															</div>
-															<div className='flex-grow-1'>
-																<div className='fs-6 fw-bold'>
-																	{i.title}
-																</div>
-															</div>
-														</div>
-													</td>
-													<td>
-														<Badge
-															color='primary'
-															className='text-uppercase'>
-															{i.type_creation === 'GENERATED' &&
-																'Gerado pela IA'}
-															{i.type_creation === 'CLONE' &&
-																'Copiada'}
-															{i.type_creation === 'DRAG_AND_DROP' &&
-																'A partir de um template'}
-															{i.type_creation === 'UPLOAD' &&
-																'Importada'}
-														</Badge>
-													</td>
-													<td>
-														{/* Adicionar hora também */}
-														{new Date(i.created_at).toLocaleDateString(
-															'pt-BR',
-														)}{' '}
-														{new Date(i.created_at).toLocaleTimeString(
-															'pt-BR',
-														)}
-													</td>
-													<td>
-														{/* Verificar se é página gerada por IA e está em status DRAFT */}
-														{i.type_creation === 'GENERATED' &&
-														i.status === 'DRAFT' ? (
-															<div className='d-flex align-items-center'>
-																<div
-																	className='spinner-border spinner-border-sm text-primary me-2'
-																	role='status'>
-																	<span className='visually-hidden'>
-																		Gerando...
-																	</span>
-																</div>
-																<span className='text-muted me-3'>
-																	Gerando página...
-																</span>
-																<Button
-																	color='info'
-																	isLight
-																	size='sm'
-																	onClick={fetchTemplates}>
-																	<Icon
-																		icon='Refresh'
-																		size='lg'
-																	/>{' '}
-																	Atualizar
-																</Button>
-															</div>
-														) : (
-															<>
-																<Button
+															</td>
+															<td>
+																<Badge
 																	color='primary'
-																	isLight
-																	size='sm'
-																	className='me-2'
-																	onClick={() =>
-																		handleVisualize(i)
-																	}>
-																	<Icon
-																		icon='Visibility'
-																		size='lg'
-																	/>{' '}
-																	Visualizar
-																</Button>
-																<Button
-																	color='primary'
-																	isLight
-																	size='sm'
-																	className='me-2'
-																	onClick={() =>
-																		handlePublish(i)
-																	}>
-																	<Icon
-																		icon='Publish'
-																		size='lg'
-																	/>{' '}
-																	Publicar
-																</Button>
-																<Button
-																	color='primary'
-																	isLight
-																	size='sm'
-																	className='me-2'
-																	onClick={() => handleEdit(i)}>
-																	<Icon icon='Edit' size='lg' />
-																</Button>
-																<Button
-																	color='danger'
-																	isLight
-																	size='sm'
-																	onClick={() =>
-																		handleOpenDeleteModal(i)
-																	}>
-																	<Icon icon='Delete' size='lg' />
-																</Button>
-															</>
-														)}
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								)}
-							</CardBody>
-							<PaginationButtons
-								data={filteredAndSortedData}
-								label='páginas'
-								setCurrentPage={setCurrentPage}
-								currentPage={currentPage}
-								perPage={perPage}
-								setPerPage={setPerPage}
-								totalItems={filteredAndSortedData.length}
-								totalPages={totalPages}
-							/>
-						</Card>
-					</div>
-				</div>
-			</Page>
+																	className='text-uppercase'>
+																	{i.type_creation ===
+																		'GENERATED' &&
+																		'Gerado pela IA'}
+																	{i.type_creation === 'CLONE' &&
+																		'Copiada'}
+																	{i.type_creation ===
+																		'DRAG_AND_DROP' &&
+																		'A partir de um template'}
+																	{i.type_creation === 'UPLOAD' &&
+																		'Importada'}
+																</Badge>
+															</td>
+															<td>
+																{/* Adicionar hora também */}
+																{new Date(
+																	i.created_at,
+																).toLocaleDateString('pt-BR')}{' '}
+																{new Date(
+																	i.created_at,
+																).toLocaleTimeString('pt-BR')}
+															</td>
+															<td>
+																{/* Verificar se é página gerada por IA e está em status DRAFT */}
+																{i.type_creation === 'GENERATED' &&
+																i.status === 'DRAFT' ? (
+																	<div className='d-flex align-items-center'>
+																		<div
+																			className='spinner-border spinner-border-sm text-primary me-2'
+																			role='status'>
+																			<span className='visually-hidden'>
+																				Gerando...
+																			</span>
+																		</div>
+																		<span className='text-muted me-3'>
+																			Gerando página...
+																		</span>
+																		<Button
+																			color='info'
+																			isLight
+																			size='sm'
+																			onClick={
+																				fetchTemplates
+																			}>
+																			<Icon
+																				icon='Refresh'
+																				size='lg'
+																			/>{' '}
+																			Atualizar
+																		</Button>
+																	</div>
+																) : (
+																	<>
+																		<Button
+																			color='primary'
+																			isLight
+																			size='sm'
+																			className='me-2'
+																			onClick={() =>
+																				handleVisualize(i)
+																			}>
+																			<Icon
+																				icon='Visibility'
+																				size='lg'
+																			/>{' '}
+																			Visualizar
+																		</Button>
+																		<Button
+																			color='primary'
+																			isLight
+																			size='sm'
+																			className='me-2'
+																			onClick={() =>
+																				handlePublish(i)
+																			}>
+																			<Icon
+																				icon='Publish'
+																				size='lg'
+																			/>{' '}
+																			Publicar
+																		</Button>
+																		<Button
+																			color='primary'
+																			isLight
+																			size='sm'
+																			className='me-2'
+																			onClick={() =>
+																				handleEdit(i)
+																			}>
+																			<Icon
+																				icon='Edit'
+																				size='lg'
+																			/>
+																		</Button>
+																		<Button
+																			color='danger'
+																			isLight
+																			size='sm'
+																			onClick={() =>
+																				handleOpenDeleteModal(
+																					i,
+																				)
+																			}>
+																			<Icon
+																				icon='Delete'
+																				size='lg'
+																			/>
+																		</Button>
+																	</>
+																)}
+															</td>
+														</tr>
+													))}
+												</tbody>
+											</table>
+										)}
+									</CardBody>
+									<PaginationButtons
+										data={filteredAndSortedData}
+										label='páginas'
+										setCurrentPage={setCurrentPage}
+										currentPage={currentPage}
+										perPage={perPage}
+										setPerPage={setPerPage}
+										totalItems={filteredAndSortedData.length}
+										totalPages={totalPages}
+									/>
+								</Card>
+							</div>
+						</div>
+					</Page>
+				</>
+			)}
 
 			{/* Modal de confirmação de delete */}
 			<Modal
