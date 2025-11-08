@@ -1,0 +1,77 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determinar tags da imagem
+        id: meta
+        run: |
+          # Converte o nome do repositório para minúsculas (requisito do GHCR)
+          IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          
+          IMAGE_TAG="${{ env.REGISTRY }}/$IMAGE_NAME_LOWER:${{ github.ref_name }}"
+          echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          
+          TAGS="$IMAGE_TAG"
+          
+          if [[ "${{ github.ref_name }}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            LATEST_TAG="${{ env.REGISTRY }}/$IMAGE_NAME_LOWER:latest"
+            TAGS="$TAGS"$'\n'"$LATEST_TAG"
+            echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "is_semantic=true" >> $GITHUB_OUTPUT
+            echo "🏷️ Tag semântica detectada, será marcada como latest também"
+          else
+            echo "is_semantic=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Tag não é semântica"
+          fi
+          
+          echo "tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$TAGS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Build e push da imagem Docker (ARM64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Confirmar publicação
+        run: |
+          echo "✅ Imagem publicada com sucesso!"
+          echo "📦 Tag: ${{ steps.meta.outputs.tag }}"
+          if [ "${{ steps.meta.outputs.is_semantic }}" == "true" ]; then
+            echo "📦 Latest: ${{ steps.meta.outputs.latest_tag }}"
+          fi
+
