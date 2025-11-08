@@ -225,6 +225,6 @@ const ForgetPassword: NextPage = () => {
 
 export const getStaticProps: GetStaticProps = async () => ({
 	props: {},
-});});
+});
 
 export default ForgetPassword;

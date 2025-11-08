@@ -13,8 +13,7 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Label from '../../../components/bootstrap/forms/Label';
 import Checks from '../../../components/bootstrap/forms/Checks';
-import Select from '../../../components/bootstrap/forms/Select';
-import userService, { User, CreateUserData, UpdateUserData } from '../../../services/userService';
+import userService, { CreateUserData, UpdateUserData, User } from '../../../services/userService';
 
 interface IUserFormModalProps {
 	id: string;

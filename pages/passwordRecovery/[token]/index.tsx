@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -18,7 +18,7 @@ import Spinner from '../../../components/bootstrap/Spinner';
 import Icon from '../../../components/icon/Icon';
 import authService from '../../../services/authService';
 
-const passwordRecovery: NextPage = () => {
+const PasswordRecovery: NextPage = () => {
 	const router = useRouter();
 	const token = typeof router.query.token === 'string' ? router.query.token : '';
 	const { darkModeStatus } = useDarkMode();
@@ -333,8 +333,8 @@ const passwordRecovery: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
+export const getServerSideProps: GetServerSideProps = async () => ({
 	props: {},
-});});
+});
 
-export default passwordRecovery;
+export default PasswordRecovery;

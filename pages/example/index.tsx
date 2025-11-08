@@ -24,6 +24,6 @@ const Index: NextPage = () => {
 
 export const getStaticProps: GetStaticProps = async () => ({
 	props: {},
-});});
+});
 
 export default Index;

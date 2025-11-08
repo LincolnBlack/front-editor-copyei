@@ -382,6 +382,6 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 
 export const getStaticProps: GetStaticProps = async () => ({
 	props: {},
-});});
+});
 
 export default Login;

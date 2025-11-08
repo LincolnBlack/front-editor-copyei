@@ -187,11 +187,11 @@ const UploadHtmlModal: React.FC<UploadHtmlModalProps> = ({ isOpen, onClose, onSu
 										color='danger'
 										size='sm'
 										isLight
-										onClick={(e) => {
+										onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 											e.stopPropagation();
 											handleRemoveFile();
 										}}
-										disabled={isUploading}>
+										isDisable={isUploading}>
 										<Icon icon='Delete' size='sm' className='me-1' />
 										Remover arquivo
 									</Button>
@@ -207,7 +207,7 @@ const UploadHtmlModal: React.FC<UploadHtmlModalProps> = ({ isOpen, onClose, onSu
 										<strong>Arraste e solte seu arquivo HTML aqui</strong>
 									</p>
 									<p className='text-muted mb-3'>ou</p>
-									<Button color='primary' isLight disabled={isUploading}>
+									<Button color='primary' isLight isDisable={isUploading}>
 										<Icon icon='UploadFile' size='sm' className='me-1' />
 										Selecionar arquivo
 									</Button>
@@ -224,6 +224,7 @@ const UploadHtmlModal: React.FC<UploadHtmlModalProps> = ({ isOpen, onClose, onSu
 							onChange={handleFileInputChange}
 							style={{ display: 'none' }}
 							disabled={isUploading}
+							data-testid='file-input'
 						/>
 					</div>
 				</div>

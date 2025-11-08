@@ -1,21 +1,11 @@
 import React from 'react';
-import { useRouter } from 'next/router';
 import Header, { HeaderLeft, HeaderRight } from '../../../layout/Header/Header';
 import Popovers from '../../../components/bootstrap/Popovers';
 import Button, { IButtonProps } from '../../../components/bootstrap/Button';
 import Icon from '../../../components/icon/Icon';
 import useDarkMode from '../../../hooks/useDarkMode';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from '../../../components/bootstrap/Dropdown';
-import LANG, { getLangWithKey, ILang } from '../../../lang';
-import Spinner from '../../../components/bootstrap/Spinner';
-import showNotification from '../../../components/extras/showNotification';
 
 const DashboardHeader = () => {
-	const router = useRouter();
 	const { darkModeStatus, setDarkModeStatus } = useDarkMode();
 
 	const styledBtn: IButtonProps = {
@@ -24,7 +14,6 @@ const DashboardHeader = () => {
 		isLight: !darkModeStatus,
 		size: 'lg',
 	};
-
 
 	return (
 		<Header>
@@ -67,7 +56,7 @@ const DashboardHeader = () => {
 
 					{/* Lang Selector */}
 					<div className='col-auto'>
-						<Dropdown>
+						{/* <Dropdown>
 							<DropdownToggle hasIcon={false}>
 								{typeof getLangWithKey(router.locale as ILang['key']['lng'])
 									?.icon === 'undefined' ? (
@@ -103,7 +92,7 @@ const DashboardHeader = () => {
 									</DropdownItem>
 								))}
 							</DropdownMenu>
-						</Dropdown>
+						</Dropdown> */}
 					</div>
 				</div>
 			</HeaderRight>
