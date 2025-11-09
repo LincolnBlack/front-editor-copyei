@@ -8,11 +8,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Instala dependências do sistema necessárias para compilar dependências nativas
 RUN apk add --no-cache libc6-compat python3 make g++
 
+# Copia arquivos de configuração do npm (se existir)
+COPY .npmrc* ./
+
 # Copia apenas arquivos de dependências
 COPY package*.json ./
 
 # Instala todas as dependências (incluindo devDependencies para build)
-RUN npm install --frozen-lockfile
+# Usa npm install sem --frozen-lockfile para compatibilidade com legacy-peer-deps
+RUN npm install
 
 # Copia código fonte
 COPY . .
