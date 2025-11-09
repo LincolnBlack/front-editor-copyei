@@ -5,11 +5,14 @@ WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Instala dependências do sistema necessárias para compilar dependências nativas
+RUN apk add --no-cache libc6-compat python3 make g++
+
 # Copia apenas arquivos de dependências
 COPY package*.json ./
 
 # Instala todas as dependências (incluindo devDependencies para build)
-RUN npm ci --frozen-lockfile
+RUN npm install --frozen-lockfile
 
 # Copia código fonte
 COPY . .
@@ -29,7 +32,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package*.json ./
 
 # Instala APENAS dependências de produção
-RUN npm ci --frozen-lockfile --omit=dev && npm cache clean --force
+RUN npm install --frozen-lockfile --omit=dev && npm cache clean --force
 
 # Copia apenas arquivos necessários para produção
 COPY --from=builder /app/.next/standalone ./
