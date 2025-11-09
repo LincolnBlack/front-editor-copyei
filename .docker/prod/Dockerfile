@@ -1,15 +1,42 @@
-FROM node:22-alpine
+# Stage 1: Build
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copia apenas arquivos de dependências
 COPY package*.json ./
 
-RUN npm install --frozen-lockfile --force
+# Instala todas as dependências (incluindo devDependencies para build)
+RUN npm ci --frozen-lockfile
 
+# Copia código fonte
 COPY . .
 
+# Build da aplicação
 RUN npm run build
+
+# Stage 2: Production
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copia apenas arquivos de dependências
+COPY package*.json ./
+
+# Instala APENAS dependências de produção
+RUN npm ci --frozen-lockfile --omit=dev && npm cache clean --force
+
+# Copia apenas arquivos necessários para produção
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.js ./
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

@@ -13,6 +13,7 @@ var hideWarn = [
 
 const nextConfig = withInterceptStdout(
 	withImages({
+		output: 'standalone', // Adicione esta linha
 		images: {
 			disableStaticImages: true
 		},
