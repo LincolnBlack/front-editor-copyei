@@ -9,7 +9,7 @@ const setCookie = (name: string, value: string, days: number = 7) => {
 
 	// Configurar domínio baseado no ambiente
 	const isProduction = process.env.NODE_ENV === 'production';
-	const domain = isProduction ? '.copyei.com.br' : 'localhost';
+	const domain = isProduction ? '.copy-ei.com' : 'localhost';
 
 	// Configurar atributos de segurança
 	const secure = isProduction ? ';Secure' : '';
