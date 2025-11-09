@@ -28,13 +28,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copia apenas arquivos de dependências
-COPY package*.json ./
-
-# Instala APENAS dependências de produção
-RUN npm install --frozen-lockfile --omit=dev && npm cache clean --force
-
 # Copia apenas arquivos necessários para produção
+# O output standalone já inclui todas as dependências necessárias
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
